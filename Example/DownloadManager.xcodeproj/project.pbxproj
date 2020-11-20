@@ -22,6 +22,12 @@
 		6003F5B2195388D20070C39A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F591195388D20070C39A /* UIKit.framework */; };
 		6003F5BA195388D20070C39A /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 6003F5B8195388D20070C39A /* InfoPlist.strings */; };
 		6003F5BC195388D20070C39A /* Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 6003F5BB195388D20070C39A /* Tests.m */; };
+		6BD34CA42566A4C9004C9CDA /* WMDownloadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BD34CA32566A4C9004C9CDA /* WMDownloadManager.m */; };
+		6BD34CAB2566A5B6004C9CDA /* WMDownloadCacheManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BD34CAA2566A5B6004C9CDA /* WMDownloadCacheManager.m */; };
+		6BD34CE225676CDA004C9CDA /* WMDownloadAdapter.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BD34CE125676CDA004C9CDA /* WMDownloadAdapter.m */; };
+		6BD34CEE2567A397004C9CDA /* NSObject+WMAutoCancel.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BD34CED2567A397004C9CDA /* NSObject+WMAutoCancel.m */; };
+		6BD34CF52567C080004C9CDA /* WMDownloadCacheManager+WMFilePath.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BD34CF42567C080004C9CDA /* WMDownloadCacheManager+WMFilePath.m */; };
+		6BD34CFC2567D3A9004C9CDA /* NSString+Path.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BD34CFB2567D3A9004C9CDA /* NSString+Path.m */; };
 		71719F9F1E33DC2100824A3D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 71719F9D1E33DC2100824A3D /* LaunchScreen.storyboard */; };
 		873B8AEB1B1F5CCA007FD442 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 873B8AEA1B1F5CCA007FD442 /* Main.storyboard */; };
 /* End PBXBuildFile section */
@@ -38,7 +44,7 @@
 
 /* Begin PBXFileReference section */
 		028A12B665D5250C5AA20DB1 /* Pods-DownloadManager_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DownloadManager_Tests.release.xcconfig"; path = "Target Support Files/Pods-DownloadManager_Tests/Pods-DownloadManager_Tests.release.xcconfig"; sourceTree = "<group>"; };
-		26B439264B7D8A720F9D00D7 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
+		26B439264B7D8A720F9D00D7 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		388B3A62B841A3A51F07445A /* Pods_DownloadManager_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_DownloadManager_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4640E3343A8F330D987B62FA /* Pods-DownloadManager_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DownloadManager_Example.release.xcconfig"; path = "Target Support Files/Pods-DownloadManager_Example/Pods-DownloadManager_Example.release.xcconfig"; sourceTree = "<group>"; };
 		6003F58A195388D20070C39A /* DownloadManager_Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DownloadManager_Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -60,13 +66,25 @@
 		6003F5B9195388D20070C39A /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		6003F5BB195388D20070C39A /* Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Tests.m; sourceTree = "<group>"; };
 		606FC2411953D9B200FFA9A0 /* Tests-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Tests-Prefix.pch"; sourceTree = "<group>"; };
-		6B1F047A5B33405D25AC6EFC /* DownloadManager.podspec */ = {isa = PBXFileReference; includeInIndex = 1; name = DownloadManager.podspec; path = ../DownloadManager.podspec; sourceTree = "<group>"; };
+		6B1F047A5B33405D25AC6EFC /* DownloadManager.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = DownloadManager.podspec; path = ../DownloadManager.podspec; sourceTree = "<group>"; };
+		6BD34CA22566A4C9004C9CDA /* WMDownloadManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WMDownloadManager.h; sourceTree = "<group>"; };
+		6BD34CA32566A4C9004C9CDA /* WMDownloadManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WMDownloadManager.m; sourceTree = "<group>"; };
+		6BD34CA92566A5B6004C9CDA /* WMDownloadCacheManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WMDownloadCacheManager.h; sourceTree = "<group>"; };
+		6BD34CAA2566A5B6004C9CDA /* WMDownloadCacheManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WMDownloadCacheManager.m; sourceTree = "<group>"; };
+		6BD34CE025676CDA004C9CDA /* WMDownloadAdapter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WMDownloadAdapter.h; sourceTree = "<group>"; };
+		6BD34CE125676CDA004C9CDA /* WMDownloadAdapter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WMDownloadAdapter.m; sourceTree = "<group>"; };
+		6BD34CEC2567A397004C9CDA /* NSObject+WMAutoCancel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSObject+WMAutoCancel.h"; sourceTree = "<group>"; };
+		6BD34CED2567A397004C9CDA /* NSObject+WMAutoCancel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSObject+WMAutoCancel.m"; sourceTree = "<group>"; };
+		6BD34CF32567C07F004C9CDA /* WMDownloadCacheManager+WMFilePath.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WMDownloadCacheManager+WMFilePath.h"; sourceTree = "<group>"; };
+		6BD34CF42567C080004C9CDA /* WMDownloadCacheManager+WMFilePath.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "WMDownloadCacheManager+WMFilePath.m"; sourceTree = "<group>"; };
+		6BD34CFA2567D3A9004C9CDA /* NSString+Path.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+Path.h"; sourceTree = "<group>"; };
+		6BD34CFB2567D3A9004C9CDA /* NSString+Path.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+Path.m"; sourceTree = "<group>"; };
 		71719F9E1E33DC2100824A3D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		77466C344A9C53DFC9192375 /* Pods-DownloadManager_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DownloadManager_Tests.debug.xcconfig"; path = "Target Support Files/Pods-DownloadManager_Tests/Pods-DownloadManager_Tests.debug.xcconfig"; sourceTree = "<group>"; };
 		873B8AEA1B1F5CCA007FD442 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = Main.storyboard; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		97C3762CA8A1F7D6048EE54E /* Pods-DownloadManager_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DownloadManager_Example.debug.xcconfig"; path = "Target Support Files/Pods-DownloadManager_Example/Pods-DownloadManager_Example.debug.xcconfig"; sourceTree = "<group>"; };
 		A77F0B7B796C06D62E7CF476 /* Pods_DownloadManager_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_DownloadManager_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		FBC36590AED32BBA91A7AAB5 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; name = README.md; path = ../README.md; sourceTree = "<group>"; };
+		FBC36590AED32BBA91A7AAB5 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -103,7 +121,6 @@
 				77466C344A9C53DFC9192375 /* Pods-DownloadManager_Tests.debug.xcconfig */,
 				028A12B665D5250C5AA20DB1 /* Pods-DownloadManager_Tests.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -144,9 +161,12 @@
 		6003F593195388D20070C39A /* Example for DownloadManager */ = {
 			isa = PBXGroup;
 			children = (
+				6BD34CA12566A470004C9CDA /* Download */,
 				6003F59C195388D20070C39A /* WMAppDelegate.h */,
 				6003F59D195388D20070C39A /* WMAppDelegate.m */,
 				873B8AEA1B1F5CCA007FD442 /* Main.storyboard */,
+				6BD34CF32567C07F004C9CDA /* WMDownloadCacheManager+WMFilePath.h */,
+				6BD34CF42567C080004C9CDA /* WMDownloadCacheManager+WMFilePath.m */,
 				6003F5A5195388D20070C39A /* WMViewController.h */,
 				6003F5A6195388D20070C39A /* WMViewController.m */,
 				71719F9D1E33DC2100824A3D /* LaunchScreen.storyboard */,
@@ -195,6 +215,23 @@
 				26B439264B7D8A720F9D00D7 /* LICENSE */,
 			);
 			name = "Podspec Metadata";
+			sourceTree = "<group>";
+		};
+		6BD34CA12566A470004C9CDA /* Download */ = {
+			isa = PBXGroup;
+			children = (
+				6BD34CFA2567D3A9004C9CDA /* NSString+Path.h */,
+				6BD34CFB2567D3A9004C9CDA /* NSString+Path.m */,
+				6BD34CA22566A4C9004C9CDA /* WMDownloadManager.h */,
+				6BD34CA32566A4C9004C9CDA /* WMDownloadManager.m */,
+				6BD34CA92566A5B6004C9CDA /* WMDownloadCacheManager.h */,
+				6BD34CAA2566A5B6004C9CDA /* WMDownloadCacheManager.m */,
+				6BD34CE025676CDA004C9CDA /* WMDownloadAdapter.h */,
+				6BD34CE125676CDA004C9CDA /* WMDownloadAdapter.m */,
+				6BD34CEC2567A397004C9CDA /* NSObject+WMAutoCancel.h */,
+				6BD34CED2567A397004C9CDA /* NSObject+WMAutoCancel.m */,
+			);
+			name = Download;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -258,6 +295,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 				Base,
 			);
@@ -302,10 +340,14 @@
 			);
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-DownloadManager_Example/Pods-DownloadManager_Example-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/AFNetworking/AFNetworking.framework",
+				"${BUILT_PRODUCTS_DIR}/SSZipArchive/SSZipArchive.framework",
 				"${BUILT_PRODUCTS_DIR}/DownloadManager/DownloadManager.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/AFNetworking.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SSZipArchive.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DownloadManager.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -364,7 +406,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6BD34CEE2567A397004C9CDA /* NSObject+WMAutoCancel.m in Sources */,
+				6BD34CAB2566A5B6004C9CDA /* WMDownloadCacheManager.m in Sources */,
 				6003F59E195388D20070C39A /* WMAppDelegate.m in Sources */,
+				6BD34CA42566A4C9004C9CDA /* WMDownloadManager.m in Sources */,
+				6BD34CFC2567D3A9004C9CDA /* NSString+Path.m in Sources */,
+				6BD34CE225676CDA004C9CDA /* WMDownloadAdapter.m in Sources */,
+				6BD34CF52567C080004C9CDA /* WMDownloadCacheManager+WMFilePath.m in Sources */,
 				6003F5A7195388D20070C39A /* WMViewController.m in Sources */,
 				6003F59A195388D20070C39A /* main.m in Sources */,
 			);
