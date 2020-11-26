@@ -14,6 +14,7 @@
 @interface WMViewController ()
 @property (nonatomic, strong) UIButton *btn;
 @property (nonatomic, strong) UIButton *clearBtn;
+@property (nonatomic, strong) UIButton *unZipBtn;
 @end
 
 @implementation WMViewController
@@ -57,8 +58,11 @@
     return _clearBtn;
 }
 - (void)downloadMp4{
-    NSString *url = @"https://rs.hdkj.zmlearn.com/coursewarezmgx-fat/zmg2/renderer/genius/homework/sdk/12271/20201116-003/1605518812186/product.zip";
-    NSString *filePath = [WMDownloadCacheManager previewPathWith:@"123" resourceId:@"456" version:@"3.2.1" url:url];
+//    @"http://dldir1.qq.com/qqfile/QQforMac/QQ_V5.4.0.dmg"
+//    NSString *url = @"https://image.zmlearn.com/coursewarezmgx/package/mp4/20200401/bdec5ae9e67a4e1193b694a03dda1f87.mp4";
+    NSString *url = @"https://rs.hdkj.zmlearn.com/coursewarezmgx-fat/zmg2/p_9f7b2874-908d-4d6c-a849-6f411cba7c9d/4/p_9f7b2874-908d-4d6c-a849-6f411cba7c9d.zip";
+//    NSString *url = @"https://rs.hdkj.zmlearn.com/coursewarezmgx-fat/zmg2/renderer/genius/homework/sdk/12271/20201116-003/1605518812186/product.zip";
+    NSString *filePath = [WMDownloadCacheManager previewPathWith:@"" resourceId:@"" version:@"" url:url];
     
     if ([WMDownloadCacheManager fileExistsAtPath:filePath]){
         [self.btn setTitle:@"已经下载" forState:(UIControlStateNormal)];
@@ -73,7 +77,7 @@
             NSLog(@"%@",response.progress);
         } else if (response.respStatus == WMDownloadResponseStatusSuccess) {
             NSLog(@"filepath ===   %@",response.storeFilePath);
-            NSLog(@"filename ===   %@",response.storeFileName);
+            NSLog(@"zipPath ===   %@",response.unZipFilePath);
         } else if (response.respStatus == WMDownloadResponseStatusFailure) {
             NSLog(@"%@",response.error);
         }

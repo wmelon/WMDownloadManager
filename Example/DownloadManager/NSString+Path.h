@@ -8,18 +8,25 @@
 
 #import <Foundation/Foundation.h>
 
+/// filePath如：/Users/sper/Library/da762db317032bdd147a028ec9fe55c7.zip
+
 @interface NSString (Path)
 /// 是否存在
 @property (nonatomic, assign, readonly) BOOL exists;
-/// 文件名+后缀
+
+/// 文件名+后缀   da762db317032bdd147a028ec9fe55c7.zip
 @property (nonatomic, copy  , readonly) NSString *last;
-/// 文件名
+
+/// 文件名 ：da762db317032bdd147a028ec9fe55c7
 @property (nonatomic, copy  , readonly) NSString *name;
-/// 去除最后一个节点
+
+/// 去除最后一个节点:  /Users/sper/Library
 @property (nonatomic, copy  , readonly) NSString *prefix;
-/// 去除后缀
+
+/// 去除后缀  : /Users/sper/Library/da762db317032bdd147a028ec9fe55c7
 @property (nonatomic, copy  , readonly) NSString *namePath;
-/// 文件格式
+
+/// 文件格式  : zip
 @property (nonatomic, copy  , readonly) NSString *extension;
 
 /// 创建文件

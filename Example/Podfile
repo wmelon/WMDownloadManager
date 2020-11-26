@@ -3,7 +3,7 @@ use_frameworks!
 platform :ios, '8.0'
 
 pod 'AFNetworking'
-pod 'SSZipArchive'
+pod 'SSZipArchive', '1.8.1'
 
 target 'DownloadManager_Example' do
   pod 'DownloadManager', :path => '../'

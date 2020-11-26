@@ -8,10 +8,19 @@
 
 #import "WMDownloadCacheManager.h"
 #import <CommonCrypto/CommonDigest.h>
-#import "NSString+Path.h"
+
+@import SSZipArchive;
 
 @implementation WMDownloadCacheManager
 
+/// 检查字符串是否为空
+/// @param string 字符串
++ (BOOL)checkStringIsEmpty:(NSString *)string {
+    if (!string || ![string isKindOfClass:[NSString class]] || string == (id)kCFNull || [string isEqualToString:@""]) {
+        return true;
+    }
+    return false;
+}
 /// 字符串MD5加密
 /// @param string 需要加密的字符串
 + (NSString *)MD5:(NSString *)string {
@@ -34,8 +43,7 @@
 /// 检查文件是否存储
 /// @param filePath 文件路径
 + (BOOL)fileExistsAtPath:(NSString *)filePath {
-    BOOL result = [[NSFileManager defaultManager] fileExistsAtPath:filePath];
-    return result;
+    return filePath.exists;
 }
 
 /// 删除本地存在的文件
@@ -49,37 +57,58 @@
 
 /// 下载数据存储地址
 /// @param filePath 外部传入文件路径
-/// @param downloadUrl 下载的数据地址
-+ (NSString *)fileCachePath:(NSString *)filePath downloadUrl:(NSString *)downloadUrl{
-    /// 下载路径不存在直接返回
-    if ([self checkStringIsEmpty:downloadUrl]){
-        return @"";
-    }
++ (NSString *)storeDictPath:(NSString *)filePath {
     /// 文件存储路径不存在，使用默认路径
     if ([self checkStringIsEmpty:filePath]) {
-        filePath = [WMDownload_resource_history_cache_PATH stringByAppendingPathComponent:downloadUrl.pathExtension];
+        filePath = WMDownload_resource_history_cache_PATH;
+    }
+    /// 如果有文件名称后缀需要剔除掉
+    NSString *extension = filePath.extension;
+    if (![self checkStringIsEmpty:extension]){
+        filePath = [filePath prefix];
     }
     /// 创建文件
     [filePath createFile];
     return filePath;
 }
-
-/// 检查字符串是否为空
-/// @param string 字符串
-+ (BOOL)checkStringIsEmpty:(NSString *)string {
-    if (!string || ![string isKindOfClass:[NSString class]] || string == (id)kCFNull || [string isEqualToString:@""]) {
-        return true;
-    }
-    return false;
-}
 /// 清除下载缓存数据
 + (void)cleanDisk {
-    [[NSFileManager defaultManager] removeItemAtPath:WMDownload_resource_history_cache_PATH error:nil];
+    if (WMDownload_resource_history_cache_PATH.exists){
+        [[NSFileManager defaultManager] removeItemAtPath:WMDownload_resource_history_cache_PATH error:nil];
+    }
 }
 /// 清除制定文件
 /// @param filePath 文件路径
 + (void)cleanDiskWithFilePath:(NSString *)filePath {
-    [[NSFileManager defaultManager] removeItemAtPath:filePath error:nil];
+    if (filePath.exists) {
+        [[NSFileManager defaultManager] removeItemAtPath:filePath error:nil];
+    }
 }
-
+/// 解压zip文件
+/// @param filePath 文件本地存储路径
++ (void)unzipDownloadFile:(NSString *)filePath unzipHandle:(void(^)(NSString *unZipPath))handle{
+    if (![filePath.extension isEqualToString:@"zip"]){
+        return;
+    }
+    /// 只有zip文件才解压
+    if (filePath.exists){ /// 文件存在
+        NSString *toPath = [filePath.prefix stringByAppendingPathComponent:[self MD5:filePath.name]];
+        __weak typeof(self) weakself = self;
+        [SSZipArchive unzipFileAtPath:filePath toDestination:toPath overwrite:YES password:nil progressHandler:^(NSString * _Nonnull entry, unz_file_info zipInfo, long entryNumber, long total) {
+        } completionHandler:^(NSString * _Nonnull path, BOOL succeeded, NSError * _Nullable error) {
+            NSLog(@"压缩包路径      ------ %@   %@",filePath,self);
+            NSLog(@"解压文件路径路径 ------ %@   %@",toPath,self);
+            if (error) { /// 解压失败删除本地解压数据
+                [weakself cleanDiskWithFilePath:toPath];
+            } else {  /// 解压成功删除原压缩包数据
+//                [weakself cleanDiskWithFilePath:filePath];
+                if (handle){
+                    handle(toPath);
+                }
+            }
+        }];
+    } else {
+        NSLog(@"需要解压的文件不存在  ---- filePath === %@",filePath);
+    }
+}
 @end

@@ -17,33 +17,63 @@
 
  @return AFHTTPSessionManager
  */
-+ (AFHTTPSessionManager *)downloaderSessionManager {
++ (AFHTTPSessionManager *)getManager {
     static AFHTTPSessionManager *downloaderSessionManager;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^ {
-        NSURLSessionConfiguration *configer = [NSURLSessionConfiguration defaultSessionConfiguration];
-        configer.timeoutIntervalForRequest = 20.0f;
-        downloaderSessionManager = [[AFHTTPSessionManager alloc] initWithSessionConfiguration:configer];
-        downloaderSessionManager.requestSerializer = [self requestSerializer];
-        downloaderSessionManager.responseSerializer = [self responseSerializer];
+        downloaderSessionManager = [AFHTTPSessionManager manager];
+        downloaderSessionManager.operationQueue.maxConcurrentOperationCount = 5;
+        
+//        NSURLSessionConfiguration *configer = [NSURLSessionConfiguration defaultSessionConfiguration];
+//        configer.timeoutIntervalForRequest = 20.0f;
+//        downloaderSessionManager = [[AFHTTPSessionManager alloc] initWithSessionConfiguration:configer];
+//        downloaderSessionManager.requestSerializer = [self requestSerializer];
+//        downloaderSessionManager.responseSerializer = [self responseSerializer];
         // AFSSLPinningModeNone 使用证书不验证模式
-        AFSecurityPolicy *securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
-        securityPolicy.allowInvalidCertificates = YES;
-        securityPolicy.validatesDomainName = NO;
-        [downloaderSessionManager setSecurityPolicy:securityPolicy];
+        downloaderSessionManager.securityPolicy.allowInvalidCertificates = NO;
+        downloaderSessionManager.securityPolicy.validatesDomainName = YES;
     });
     return downloaderSessionManager;
 }
-+ (AFHTTPRequestSerializer *)requestSerializer{
-    AFHTTPRequestSerializer *requestSerializer = [AFJSONRequestSerializer serializer];
-    return requestSerializer;
-}
-+ (AFHTTPResponseSerializer *)responseSerializer{
-    AFJSONResponseSerializer *responseSerializer = [AFJSONResponseSerializer
-                                                    serializerWithReadingOptions:NSJSONReadingAllowFragments];
-    responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"application/json",@"text/json",@"text/javascript",@"text/html",@"text/plain",nil];
-    return responseSerializer;
-}
+//+ (AFHTTPRequestSerializer *)requestSerializer{
+//    AFHTTPRequestSerializer *requestSerializer = [AFJSONRequestSerializer serializer];
+//    return requestSerializer;
+//}
+//+ (AFHTTPResponseSerializer *)responseSerializer{
+//    AFJSONResponseSerializer *responseSerializer = [AFJSONResponseSerializer
+//                                                    serializerWithReadingOptions:NSJSONReadingAllowFragments];
+//    responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"application/json",@"text/json",@"text/javascript",@"text/html",@"text/plain",nil];
+//    return responseSerializer;
+//}
+//+ (NSString *)replaceTaskHostWithUrl:(NSString *)baseUrl{
+//    if ([ZMYDomainManager instance].httpdnsEnable && ([ZMYDomainManager instance].isIpv6 == NO) && [ZMDL share].switchForDownLoad) {
+//        self.session.securityPolicy.allowInvalidCertificates = YES;
+//        self.session.securityPolicy.validatesDomainName = NO;
+//
+//        NSString *host = [[NSURL URLWithString:baseUrl] host];
+//        NSLog(@"baseUrl===========================%@",baseUrl);
+//        NSString *ip = [[ZMYDomainManager instance] getHostIP:host];
+//        NSString *replaceBaseUrl = @"";
+//        if (ip && ip.length >0) {
+//            replaceBaseUrl =  [baseUrl stringByReplacingOccurrencesOfString:host withString:ip];
+//        }else{
+//            return baseUrl;
+//        }
+//        NSLog(@"replaceBaseUrl===========================%@",replaceBaseUrl);
+//        [ZMAIKitAnalyseManager analyse:KT_Event_HttpDnsReplaceIp attributes:@{
+//            @"userId":Safe_Param([ZMAIKitManager manager].params.userInfo.userId),
+//            @"requestPath":Safe_Param(replaceBaseUrl)
+//        }];
+//        return replaceBaseUrl;
+//
+//    }else{
+//        [self downloaderSessionManager].securityPolicy.allowInvalidCertificates = NO;
+//        [self downloaderSessionManager].securityPolicy.validatesDomainName = YES;
+//        return baseUrl;
+
+//    }
+//    return baseUrl;
+//}
 /// 单个下载请求
 /// @param complete 下载完成回调
 /// @param downloadAdapter 下载数据结构体
@@ -53,9 +83,19 @@
     /// 请求参数
     NSDictionary *paramer = [downloadAdapter getRequestParameter];
     NSLog(@">>>> %@ > %@ -> parameters %@",downloadUrl, @"Download" ,paramer);
+    
+    /// 创建本地存储数据地址
+    NSString *storeDictPath = [WMDownloadCacheManager storeDictPath:downloadAdapter.storeFilePath];
+    /// 下载本地存储路径
+    NSString *storeFilePath = downloadAdapter.storeFilePath;
+    
+    /// 下载session管理器
+    AFHTTPSessionManager *sessionManager = [WMDownloadManager getManager];
+    
     /// 构建afnetworking 请求
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:downloadUrl]];
-    NSURLSessionDownloadTask *downloadTask = [self.downloaderSessionManager downloadTaskWithRequest:request progress:^(NSProgress * _Nonnull downloadProgress) {
+    
+    NSURLSessionDownloadTask *downloadTask = [sessionManager downloadTaskWithRequest:request progress:^(NSProgress * _Nonnull downloadProgress) {
         dispatch_async(dispatch_get_main_queue(), ^{
             /// 请求进度
             [downloadAdapter responseAdapterWithProgress:downloadProgress];
@@ -64,14 +104,13 @@
             }
         });
     } destination:^NSURL * _Nonnull(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
-        /// 下载本地存储路径
-        NSString *filePath = [WMDownloadCacheManager fileCachePath:downloadAdapter.storeFilePath downloadUrl:downloadUrl];
-        return [NSURL URLWithString:filePath];
         
+        NSURL *URL = [NSURL fileURLWithPath:storeFilePath];
+        return URL;
     } completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error) {
         dispatch_async(dispatch_get_main_queue(), ^{
             /// 下载完成处理
-            [downloadAdapter responseAdapterWithResult:response filePath:filePath error:error];
+            [downloadAdapter responseAdapterWithResult:response filePath:storeFilePath error:error];
             if (complete){
                 complete(downloadAdapter);
             }

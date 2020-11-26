@@ -68,10 +68,13 @@
 /// @param filePath 存储下载数据文件路径
 /// @param error 下载失败
 - (void)responseAdapterWithResult:(NSURLResponse *)response
-                         filePath:(NSURL *)filePath
+                         filePath:(NSString *)filePath
                             error:(NSError *)error {
-    if ([filePath isKindOfClass:[NSURL class]]){
-        _storeFilePath = filePath.absoluteString;
+    if ([filePath isKindOfClass:[NSString class]]){
+        _storeFilePath = filePath;
+    } else if ([filePath isKindOfClass:[NSURL class]]){
+        NSURL *url = (NSURL *)filePath;
+        _storeFilePath = url.absoluteString;
     }
     
     if (error) { /// 下载失败处理
@@ -98,16 +101,16 @@
 }
 - (void)downloadSuccess:(NSString *)filePath response:(NSURLResponse *)response{
     NSLog(@"😄😄😄 %@ 请求成功 %@ ===> filePath %@",self ,response.URL.absoluteString,filePath);
-    if (filePath){ /// 存储失败
-        _msg = @"缓存失败";
-        _respStatus = WMDownloadResponseStatusSuccess;
-    } else {
+    if (filePath){
         _msg = @"下载成功";
+        _respStatus = WMDownloadResponseStatusSuccess;
+        /// 解压缩包
+        [WMDownloadCacheManager unzipDownloadFile:filePath unzipHandle:^(NSString * _Nonnull unZipPath) {
+            _unZipFilePath = unZipPath;
+        }];
+    } else {
+        _msg = @"缓存失败";
         _respStatus = WMDownloadResponseStatusNoSpace;
     }
-}
-#pragma mark -- getter method
-- (NSString *)storeFileName {
-    return self.downloadUrl.pathExtension;
 }
 @end

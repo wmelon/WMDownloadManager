@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "NSString+Path.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -28,8 +29,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// 下载数据存储地址
 /// @param filePath 外部传入文件路径
-/// @param downloadUrl 下载的数据地址
-+ (NSString *)fileCachePath:(NSString *)filePath downloadUrl:(NSString *)downloadUrl;
++ (NSString *)storeDictPath:(NSString *)filePath;
 
 /// 清除所有下载缓存数据
 + (void)cleanDisk;
@@ -38,6 +38,9 @@ NS_ASSUME_NONNULL_BEGIN
 /// @param filePath 文件路径
 + (void)cleanDiskWithFilePath:(NSString *)filePath;
 
+/// 加压zip文件
+/// @param filePath 文件本地存储路径
++ (void)unzipDownloadFile:(NSString *)filePath unzipHandle:(void(^)(NSString *unZipPath))handle;
 @end
 
 NS_ASSUME_NONNULL_END
