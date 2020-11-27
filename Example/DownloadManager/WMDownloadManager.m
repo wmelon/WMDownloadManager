@@ -24,11 +24,6 @@
         sessionManager = [AFHTTPSessionManager manager];
         sessionManager.operationQueue.maxConcurrentOperationCount = 5;
         
-//        NSURLSessionConfiguration *configer = [NSURLSessionConfiguration defaultSessionConfiguration];
-//        configer.timeoutIntervalForRequest = 20.0f;
-//        downloaderSessionManager = [[AFHTTPSessionManager alloc] initWithSessionConfiguration:configer];
-//        downloaderSessionManager.requestSerializer = [self requestSerializer];
-//        downloaderSessionManager.responseSerializer = [self responseSerializer];
         // AFSSLPinningModeNone 使用证书不验证模式
         sessionManager.securityPolicy.allowInvalidCertificates = NO;
         sessionManager.securityPolicy.validatesDomainName = YES;
@@ -43,51 +38,15 @@
     }
     return sessionManager;
 }
-//+ (AFHTTPRequestSerializer *)requestSerializer{
-//    AFHTTPRequestSerializer *requestSerializer = [AFJSONRequestSerializer serializer];
-//    return requestSerializer;
-//}
-//+ (AFHTTPResponseSerializer *)responseSerializer{
-//    AFJSONResponseSerializer *responseSerializer = [AFJSONResponseSerializer
-//                                                    serializerWithReadingOptions:NSJSONReadingAllowFragments];
-//    responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"application/json",@"text/json",@"text/javascript",@"text/html",@"text/plain",nil];
-//    return responseSerializer;
-//}
-//+ (NSString *)replaceTaskHostWithUrl:(NSString *)baseUrl{
-//    if ([ZMYDomainManager instance].httpdnsEnable && ([ZMYDomainManager instance].isIpv6 == NO) && [ZMDL share].switchForDownLoad) {
-//        self.session.securityPolicy.allowInvalidCertificates = YES;
-//        self.session.securityPolicy.validatesDomainName = NO;
-//
-//        NSString *host = [[NSURL URLWithString:baseUrl] host];
-//        NSLog(@"baseUrl===========================%@",baseUrl);
-//        NSString *ip = [[ZMYDomainManager instance] getHostIP:host];
-//        NSString *replaceBaseUrl = @"";
-//        if (ip && ip.length >0) {
-//            replaceBaseUrl =  [baseUrl stringByReplacingOccurrencesOfString:host withString:ip];
-//        }else{
-//            return baseUrl;
-//        }
-//        NSLog(@"replaceBaseUrl===========================%@",replaceBaseUrl);
-//        [ZMAIKitAnalyseManager analyse:KT_Event_HttpDnsReplaceIp attributes:@{
-//            @"userId":Safe_Param([ZMAIKitManager manager].params.userInfo.userId),
-//            @"requestPath":Safe_Param(replaceBaseUrl)
-//        }];
-//        return replaceBaseUrl;
-//
-//    }else{
-//        [self downloaderSessionManager].securityPolicy.allowInvalidCertificates = NO;
-//        [self downloaderSessionManager].securityPolicy.validatesDomainName = YES;
-//        return baseUrl;
-
-//    }
-//    return baseUrl;
-//}
 /// 单个下载请求
 /// @param complete 下载完成回调
 /// @param downloadAdapter 下载数据结构体
 + (void)downloadWithcomplete:(WMDownloadCompletionHandle)complete downloadAdapter:(WMDownloadAdapter *)downloadAdapter {
+    /// 下载session管理器
+    AFHTTPSessionManager *sessionManager = [self sessionManager:downloadAdapter];
+    
     /// 请求地址
-    NSString *downloadUrl = [downloadAdapter getReallyDownloadUrl:downloadAdapter.downloadUrl];
+    NSString *downloadUrl = [downloadAdapter getReallyDownloadUrl:downloadAdapter.downloadUrl sessionManager:sessionManager];
     /// 请求参数
     NSDictionary *paramer = [downloadAdapter getRequestParameter];
     NSLog(@">>>> %@ > %@ -> parameters %@",downloadUrl, @"Download" ,paramer);
@@ -96,9 +55,6 @@
     NSString *dictPath = [WMDownloadCacheManager dictPathWithDictPath:downloadAdapter.direcPath];
     /// 下载本地存储路径
     NSString *filePath = [WMDownloadCacheManager filePathWithDictPath:dictPath url:downloadUrl];
-    
-    /// 下载session管理器
-    AFHTTPSessionManager *sessionManager = [self sessionManager:downloadAdapter];
     
     /// 构建afnetworking 请求
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:downloadUrl]];
@@ -123,6 +79,8 @@
             }
         });
     }];
+    /// 设置请求队列
+    [downloadAdapter requestSessionTask:downloadTask];
     downloadTask.priority = 1000;
     [downloadTask resume];
 }
@@ -136,7 +94,10 @@
 
 /// 取消单个下载请求
 + (void)cancelDownload:(WMDownloadAdapter *)download {
-    
+    NSParameterAssert(download != nil);
+    NSURLSessionTask *task = download.sessionTask;
+//    [self removeRequestFromRecord:request];
+    [task cancel];
 }
 
 /// 取消所有网络请求

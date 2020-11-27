@@ -44,10 +44,19 @@
 }
 
 #pragma mark -- downloadmanager 需要使用的方法
+/// 设置请求队列
+/// @param sessionTask 当前请求队列
+- (void)requestSessionTask:(NSURLSessionTask *)sessionTask {
+    _sessionTask = sessionTask;
+}
+
 /// 获取请求的网络地址
-- (NSString *)getReallyDownloadUrl:(NSString *)url {
+/// @param url 请求地址
+/// @param sessionManager 请求管理器
+- (NSString *)getReallyDownloadUrl:(NSString *)url sessionManager:(AFHTTPSessionManager *)sessionManager {
     return url;
 }
+
 /**获取请求参数*/
 - (NSDictionary *)getRequestParameter {
     return self.parameterDict;

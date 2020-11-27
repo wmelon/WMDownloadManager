@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "AFHTTPSessionManager.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -51,6 +52,9 @@ typedef NS_ENUM(NSInteger, WMDownloadResponseStatus) {
 /// 下载资源地址 /// 外部传入的请求地址  可能不包含域名，所以真实的请求地址需要进行二次拼接
 @property (nonatomic, copy  , readonly) NSString *downloadUrl;
 
+/// 网络请求队列
+@property (nonatomic, strong, readonly) NSURLSessionTask *sessionTask;
+
 #pragma mark -- 构建请求体需要的方法
 
 /// 初始化请求对象
@@ -66,9 +70,11 @@ typedef NS_ENUM(NSInteger, WMDownloadResponseStatus) {
 - (void)configDirecPath:(NSString *)direcPath;
 
 #pragma mark -- downloadmanager 需要使用的方法
-
+    
 /// 获取请求的网络地址
-- (NSString *)getReallyDownloadUrl:(NSString *)url;
+/// @param url 请求地址
+/// @param sessionManager 请求管理器
+- (NSString *)getReallyDownloadUrl:(NSString *)url sessionManager:(AFHTTPSessionManager *)sessionManager;
 
 /// 请求进度处理
 /// @param progress 进度数据
@@ -88,6 +94,10 @@ typedef NS_ENUM(NSInteger, WMDownloadResponseStatus) {
 
 /// 请求公共参数
 - (NSDictionary *)getRequestPublicParameter;
+
+/// 设置请求队列
+/// @param sessionTask 当前请求队列
+- (void)requestSessionTask:(NSURLSessionTask *)sessionTask;
 
 @end
 
