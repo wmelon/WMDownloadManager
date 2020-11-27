@@ -10,15 +10,15 @@
 #import "WMDownloadCacheManager.h"
 
 @interface WMDownloadAdapter()
-/// 外部传入的请求地址  可能不包含域名，所以真实的请求地址需要进行二次拼接
-@property (nonatomic, copy  ) NSString *downloadUrl;
+
 @end
 
 @implementation WMDownloadAdapter
+@synthesize parameterDict = _parameterDict;
 
 /// 初始化请求对象
 + (instancetype)downloadWithUrl:(NSString *)downloadUrl {
-    return [[WMDownloadAdapter alloc] initWithUrl:downloadUrl];
+    return [[self alloc] initWithUrl:downloadUrl];
 }
 
 - (instancetype)initWithUrl:(NSString *)downloadUrl {
@@ -30,29 +30,30 @@
 
 /// 请求参数  这个适用于确定字典不为空的情况
 - (void)downloadParameters:(NSDictionary *)params {
-    
+    NSAssert(![params isKindOfClass:[NSDictionary class]], @"参数必须是字典类型");
+    [self.parameterDict setValuesForKeysWithDictionary:params];
 }
 
 /// 请求参数拼接
 - (void)downloadParameterSetValue:(id)value forKey:(NSString *)key {
-    
+    [self.parameterDict setValue:value forKey:key];
 }
-/// 文件下载存储路径和文件名称
-- (void)configFilePath:(NSString *)filePath {
-    _storeFilePath = filePath;
+/// 设置文件下载存储文件夹路径
+- (void)configDirecPath:(NSString *)direcPath {
+    _direcPath = direcPath;
 }
 
 #pragma mark -- downloadmanager 需要使用的方法
 /// 获取请求的网络地址
-- (NSString *)getReallyDownloadUrl {
-    return self.downloadUrl;
+- (NSString *)getReallyDownloadUrl:(NSString *)url {
+    return url;
 }
 /**获取请求参数*/
 - (NSDictionary *)getRequestParameter {
-    return @{};
+    return self.parameterDict;
 }
 
-/// 请求公共参数
+/// 请求公共参数  需要公共参数子类重写这个方法
 - (NSDictionary *)getRequestPublicParameter {
     return @{};
 }
@@ -71,21 +72,21 @@
                          filePath:(NSString *)filePath
                             error:(NSError *)error {
     if ([filePath isKindOfClass:[NSString class]]){
-        _storeFilePath = filePath;
+        _filePath = filePath;
     } else if ([filePath isKindOfClass:[NSURL class]]){
         NSURL *url = (NSURL *)filePath;
-        _storeFilePath = url.absoluteString;
+        _filePath = url.absoluteString;
     }
     
     if (error) { /// 下载失败处理
-        [self downloadFail:_storeFilePath error:error response:response];
+        [self downloadFail:_filePath error:error response:response];
     } else {  /// 下载成功处理
-        [self downloadSuccess:_storeFilePath response:response];
+        [self downloadSuccess:_filePath response:response];
     }
 }
 - (void)downloadFail:(NSString *)filePath error:(NSError *)error response:(NSURLResponse *)response{
     _error = error;
-    NSLog(@"😂😂😂 %@ 请求失败 %@ ===> statusCode: %zd",self ,response.URL.absoluteString,error.code);
+    NSLog(@"😂😂😂 %@ 请求失败 (地址 ===> %@) ===> statusCode: %zd",self ,response.URL.absoluteString,error.code);
     /// 下载失败删除本地数据
     if ([WMDownloadCacheManager fileExistsAtPath:filePath]){
         [WMDownloadCacheManager removeItemAtPath:filePath];
@@ -100,7 +101,7 @@
     }
 }
 - (void)downloadSuccess:(NSString *)filePath response:(NSURLResponse *)response{
-    NSLog(@"😄😄😄 %@ 请求成功 %@ ===> filePath %@",self ,response.URL.absoluteString,filePath);
+    NSLog(@"😄😄😄 %@ 请求成功  (地址 ===> %@)",self ,response.URL.absoluteString);
     if (filePath){
         _msg = @"下载成功";
         _respStatus = WMDownloadResponseStatusSuccess;
@@ -112,5 +113,12 @@
         _msg = @"缓存失败";
         _respStatus = WMDownloadResponseStatusNoSpace;
     }
+}
+#pragma mark -- getter
+- (NSMutableDictionary *)parameterDict{
+    if (_parameterDict == nil){
+        _parameterDict = [NSMutableDictionary dictionary];
+    }
+    return _parameterDict;
 }
 @end

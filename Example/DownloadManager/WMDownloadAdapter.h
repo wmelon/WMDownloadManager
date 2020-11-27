@@ -33,14 +33,23 @@ typedef NS_ENUM(NSInteger, WMDownloadResponseStatus) {
 /// 请求进度
 @property (nonatomic, strong, readonly) NSProgress *progress;
 
+/// 本地缓存文件夹路径
+@property (nonatomic, copy  , readonly) NSString *direcPath;
+
 /// 本地存储数据文件路径
-@property (nonatomic, copy  , readonly) NSString *storeFilePath;
+@property (nonatomic, copy  , readonly) NSString *filePath;
 
 /// zip文件解压后的地址 （只有zip文件格式的数据才会有这个解压地址）
 @property (nonatomic, copy  , readonly) NSString *unZipFilePath;
 
 /// 当前下载百分比
 @property (nonatomic, assign, readonly) double currentProgres;
+
+/// 网络请求参数
+@property (nonatomic, strong, readonly) NSMutableDictionary * parameterDict;
+
+/// 下载资源地址 /// 外部传入的请求地址  可能不包含域名，所以真实的请求地址需要进行二次拼接
+@property (nonatomic, copy  , readonly) NSString *downloadUrl;
 
 #pragma mark -- 构建请求体需要的方法
 
@@ -53,13 +62,13 @@ typedef NS_ENUM(NSInteger, WMDownloadResponseStatus) {
 /// 请求参数
 - (void)downloadParameterSetValue:(id)value forKey:(NSString *)key;
 
-/// 文件下载存储路径和文件路径
-- (void)configFilePath:(NSString *)filePath;
+/// 设置文件下载存储文件夹路径
+- (void)configDirecPath:(NSString *)direcPath;
 
 #pragma mark -- downloadmanager 需要使用的方法
 
 /// 获取请求的网络地址
-- (NSString *)getReallyDownloadUrl;
+- (NSString *)getReallyDownloadUrl:(NSString *)url;
 
 /// 请求进度处理
 /// @param progress 进度数据

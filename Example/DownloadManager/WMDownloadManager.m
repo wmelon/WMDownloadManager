@@ -17,12 +17,12 @@
 
  @return AFHTTPSessionManager
  */
-+ (AFHTTPSessionManager *)getManager {
-    static AFHTTPSessionManager *downloaderSessionManager;
++ (AFHTTPSessionManager *)sessionManager:(WMDownloadAdapter *)requestAdapter {
+    static AFHTTPSessionManager *sessionManager;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^ {
-        downloaderSessionManager = [AFHTTPSessionManager manager];
-        downloaderSessionManager.operationQueue.maxConcurrentOperationCount = 5;
+        sessionManager = [AFHTTPSessionManager manager];
+        sessionManager.operationQueue.maxConcurrentOperationCount = 5;
         
 //        NSURLSessionConfiguration *configer = [NSURLSessionConfiguration defaultSessionConfiguration];
 //        configer.timeoutIntervalForRequest = 20.0f;
@@ -30,10 +30,18 @@
 //        downloaderSessionManager.requestSerializer = [self requestSerializer];
 //        downloaderSessionManager.responseSerializer = [self responseSerializer];
         // AFSSLPinningModeNone 使用证书不验证模式
-        downloaderSessionManager.securityPolicy.allowInvalidCertificates = NO;
-        downloaderSessionManager.securityPolicy.validatesDomainName = YES;
+        sessionManager.securityPolicy.allowInvalidCertificates = NO;
+        sessionManager.securityPolicy.validatesDomainName = YES;
     });
-    return downloaderSessionManager;
+    
+    /// 请求头中设置公共参数
+    if ([requestAdapter respondsToSelector:@selector(getRequestPublicParameter)]) {
+        NSDictionary *dict = [requestAdapter getRequestPublicParameter];
+        [dict enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+            [sessionManager.requestSerializer setValue:obj forHTTPHeaderField:key];
+        }];
+    }
+    return sessionManager;
 }
 //+ (AFHTTPRequestSerializer *)requestSerializer{
 //    AFHTTPRequestSerializer *requestSerializer = [AFJSONRequestSerializer serializer];
@@ -79,18 +87,18 @@
 /// @param downloadAdapter 下载数据结构体
 + (void)downloadWithcomplete:(WMDownloadCompletionHandle)complete downloadAdapter:(WMDownloadAdapter *)downloadAdapter {
     /// 请求地址
-    NSString *downloadUrl = [downloadAdapter getReallyDownloadUrl];
+    NSString *downloadUrl = [downloadAdapter getReallyDownloadUrl:downloadAdapter.downloadUrl];
     /// 请求参数
     NSDictionary *paramer = [downloadAdapter getRequestParameter];
     NSLog(@">>>> %@ > %@ -> parameters %@",downloadUrl, @"Download" ,paramer);
     
-    /// 创建本地存储数据地址
-    NSString *storeDictPath = [WMDownloadCacheManager storeDictPath:downloadAdapter.storeFilePath];
+    /// 创建本地存储数据文件夹地址
+    NSString *dictPath = [WMDownloadCacheManager dictPathWithDictPath:downloadAdapter.direcPath];
     /// 下载本地存储路径
-    NSString *storeFilePath = downloadAdapter.storeFilePath;
+    NSString *filePath = [WMDownloadCacheManager filePathWithDictPath:dictPath url:downloadUrl];
     
     /// 下载session管理器
-    AFHTTPSessionManager *sessionManager = [WMDownloadManager getManager];
+    AFHTTPSessionManager *sessionManager = [self sessionManager:downloadAdapter];
     
     /// 构建afnetworking 请求
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:downloadUrl]];
@@ -104,13 +112,12 @@
             }
         });
     } destination:^NSURL * _Nonnull(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
-        
-        NSURL *URL = [NSURL fileURLWithPath:storeFilePath];
+        NSURL *URL = [NSURL fileURLWithPath:filePath];
         return URL;
-    } completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error) {
+    } completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePathUrl, NSError * _Nullable error) {
         dispatch_async(dispatch_get_main_queue(), ^{
             /// 下载完成处理
-            [downloadAdapter responseAdapterWithResult:response filePath:storeFilePath error:error];
+            [downloadAdapter responseAdapterWithResult:response filePath:filePath error:error];
             if (complete){
                 complete(downloadAdapter);
             }
