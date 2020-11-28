@@ -66,13 +66,23 @@
 - (NSDictionary *)getRequestPublicParameter {
     return @{};
 }
+
 /// 请求进度处理
 /// @param progress 进度数据
-- (void)responseAdapterWithProgress:(NSProgress *)progress {
-    _progress = progress;
-    _currentProgres = ((double)progress.completedUnitCount) / progress.totalUnitCount;
+- (void)responseAdapterWithProgress:(NSProgress *)progress currentLength:(NSInteger)currentLength{
+    /// 总数据
+    int64_t totalUnitCount = progress.totalUnitCount + currentLength;
+    /// 下载完成数据
+    int64_t completedUnitCount = progress.completedUnitCount + currentLength;
+    /// 完成百分比
+    double fractionCompleted = 100.0 * completedUnitCount / totalUnitCount;
+    WMProgress *wmPro = [WMProgress progressWithTotalUnitCount:totalUnitCount
+                                            completedUnitCount:completedUnitCount
+                                             fractionCompleted:fractionCompleted];
+    _progress = wmPro;
     _respStatus = WMDownloadResponseStatusProgress;
 }
+
 /// 下载完成处理
 /// @param response 返回数据
 /// @param filePath 存储下载数据文件路径
@@ -97,7 +107,7 @@
     _error = error;
     NSLog(@"😂😂😂 %@ 请求失败 (地址 ===> %@) ===> statusCode: %zd",self ,response.URL.absoluteString,error.code);
     /// 下载失败删除本地数据
-    if ([WMDownloadCacheManager fileExistsAtPath:filePath]){
+    if (filePath.exists){
         [WMDownloadCacheManager removeItemAtPath:filePath];
     }
     
@@ -123,6 +133,26 @@
         _respStatus = WMDownloadResponseStatusNoSpace;
     }
 }
+/// 取消单个下载请求
+- (void)cancelDownload {
+    _respStatus = WMDownloadResponseStatusCancel;
+    [self.sessionTask cancel];
+}
+
+/// 暂停单个下载请求
+- (void)pauseDownload {
+    _respStatus = WMDownloadResponseStatusPause;
+    /// 暂停下载
+    [self.sessionTask suspend];
+}
+
+/// 断点续传单个请求
+- (void)resumeDownload {
+    _respStatus = WMDownloadResponseStatusProgress;
+    /// 继续下载
+    [self.sessionTask resume];
+}
+
 #pragma mark -- getter
 - (NSMutableDictionary *)parameterDict{
     if (_parameterDict == nil){
@@ -130,4 +160,5 @@
     }
     return _parameterDict;
 }
+
 @end

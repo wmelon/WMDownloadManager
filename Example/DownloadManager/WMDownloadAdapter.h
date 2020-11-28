@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "AFHTTPSessionManager.h"
+#import "WMProgress.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -15,8 +16,9 @@ typedef NS_ENUM(NSInteger, WMDownloadResponseStatus) {
     WMDownloadResponseStatusDefault = 0,        //初始状态
     WMDownloadResponseStatusSuccess,            //成功
     WMDownloadResponseStatusProgress,           //正在请求中
+    WMDownloadResponseStatusPause,              //暂停下载
+    WMDownloadResponseStatusCancel,             //已经取消
     WMDownloadResponseStatusFailure,            //失败
-    WMDownloadResponseStatusCancel,             //任务被取消
     WMDownloadResponseStatusNoSpace,            //手机空间不足
 };
 
@@ -32,7 +34,7 @@ typedef NS_ENUM(NSInteger, WMDownloadResponseStatus) {
 @property (nonatomic, strong, readonly) NSError * error;
 
 /// 请求进度
-@property (nonatomic, strong, readonly) NSProgress *progress;
+@property (nonatomic, strong, readonly) WMProgress *progress;
 
 /// 本地缓存文件夹路径
 @property (nonatomic, copy  , readonly) NSString *direcPath;
@@ -42,9 +44,6 @@ typedef NS_ENUM(NSInteger, WMDownloadResponseStatus) {
 
 /// zip文件解压后的地址 （只有zip文件格式的数据才会有这个解压地址）
 @property (nonatomic, copy  , readonly) NSString *unZipFilePath;
-
-/// 当前下载百分比
-@property (nonatomic, assign, readonly) double currentProgres;
 
 /// 网络请求参数
 @property (nonatomic, strong, readonly) NSMutableDictionary * parameterDict;
@@ -78,7 +77,8 @@ typedef NS_ENUM(NSInteger, WMDownloadResponseStatus) {
 
 /// 请求进度处理
 /// @param progress 进度数据
-- (void)responseAdapterWithProgress:(NSProgress *)progress;
+/// @param currentLength 当前数据
+- (void)responseAdapterWithProgress:(NSProgress *)progress currentLength:(NSInteger)currentLength;
 
 /// 下载完成处理
 /// @param response 返回数据
@@ -98,6 +98,15 @@ typedef NS_ENUM(NSInteger, WMDownloadResponseStatus) {
 /// 设置请求队列
 /// @param sessionTask 当前请求队列
 - (void)requestSessionTask:(NSURLSessionTask *)sessionTask;
+
+/// 取消单个下载请求
+- (void)cancelDownload;
+
+/// 暂停单个下载请求
+- (void)pauseDownload;
+
+/// 断点续传单个请求
+- (void)resumeDownload;
 
 @end
 

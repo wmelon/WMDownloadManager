@@ -81,6 +81,7 @@
 //        sessionManager.securityPolicy.allowInvalidCertificates = YES;
 //        sessionManager.securityPolicy.validatesDomainName = NO;
 //    }
+
     
     return url;
 //    NSString *paramsUrl = [self publicParamsAppending:url];

@@ -13,10 +13,10 @@
 #pragma mark - ✋
 
 - (BOOL)exists {
-    NSString *extension = [self pathExtension];
+    NSString *extension = self.extension;
     BOOL isDir = (extension || extension.length > 0) ? NO : YES;
     NSFileManager *manager = [NSFileManager defaultManager];
-    
+
     return [manager fileExistsAtPath:self isDirectory:&isDir];
 }
 

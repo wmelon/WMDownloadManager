@@ -22,6 +22,8 @@
 		6003F5B2195388D20070C39A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F591195388D20070C39A /* UIKit.framework */; };
 		6003F5BA195388D20070C39A /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 6003F5B8195388D20070C39A /* InfoPlist.strings */; };
 		6003F5BC195388D20070C39A /* Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 6003F5BB195388D20070C39A /* Tests.m */; };
+		6BACC9A925723AC500585FDD /* WMProgress.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BACC9A825723AC500585FDD /* WMProgress.m */; };
+		6BACC9AE25723EBD00585FDD /* WMAliSDkPlayerService.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BACC9AD25723EBD00585FDD /* WMAliSDkPlayerService.m */; };
 		6BC42447257125A0006B8A2B /* WMDiyDownload.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BC42446257125A0006B8A2B /* WMDiyDownload.m */; };
 		6BD34CA42566A4C9004C9CDA /* WMDownloadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BD34CA32566A4C9004C9CDA /* WMDownloadManager.m */; };
 		6BD34CAB2566A5B6004C9CDA /* WMDownloadCacheManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BD34CAA2566A5B6004C9CDA /* WMDownloadCacheManager.m */; };
@@ -68,6 +70,10 @@
 		6003F5BB195388D20070C39A /* Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Tests.m; sourceTree = "<group>"; };
 		606FC2411953D9B200FFA9A0 /* Tests-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Tests-Prefix.pch"; sourceTree = "<group>"; };
 		6B1F047A5B33405D25AC6EFC /* DownloadManager.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = DownloadManager.podspec; path = ../DownloadManager.podspec; sourceTree = "<group>"; };
+		6BACC9A725723AC500585FDD /* WMProgress.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WMProgress.h; sourceTree = "<group>"; };
+		6BACC9A825723AC500585FDD /* WMProgress.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WMProgress.m; sourceTree = "<group>"; };
+		6BACC9AC25723EBD00585FDD /* WMAliSDkPlayerService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WMAliSDkPlayerService.h; sourceTree = "<group>"; };
+		6BACC9AD25723EBD00585FDD /* WMAliSDkPlayerService.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WMAliSDkPlayerService.m; sourceTree = "<group>"; };
 		6BC42445257125A0006B8A2B /* WMDiyDownload.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WMDiyDownload.h; sourceTree = "<group>"; };
 		6BC42446257125A0006B8A2B /* WMDiyDownload.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WMDiyDownload.m; sourceTree = "<group>"; };
 		6BD34CA22566A4C9004C9CDA /* WMDownloadManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WMDownloadManager.h; sourceTree = "<group>"; };
@@ -177,6 +183,8 @@
 				6003F594195388D20070C39A /* Supporting Files */,
 				6BC42445257125A0006B8A2B /* WMDiyDownload.h */,
 				6BC42446257125A0006B8A2B /* WMDiyDownload.m */,
+				6BACC9AC25723EBD00585FDD /* WMAliSDkPlayerService.h */,
+				6BACC9AD25723EBD00585FDD /* WMAliSDkPlayerService.m */,
 			);
 			name = "Example for DownloadManager";
 			path = DownloadManager;
@@ -235,6 +243,8 @@
 				6BD34CE125676CDA004C9CDA /* WMDownloadAdapter.m */,
 				6BD34CEC2567A397004C9CDA /* NSObject+WMAutoCancel.h */,
 				6BD34CED2567A397004C9CDA /* NSObject+WMAutoCancel.m */,
+				6BACC9A725723AC500585FDD /* WMProgress.h */,
+				6BACC9A825723AC500585FDD /* WMProgress.m */,
 			);
 			name = Download;
 			sourceTree = "<group>";
@@ -415,11 +425,13 @@
 				6BD34CEE2567A397004C9CDA /* NSObject+WMAutoCancel.m in Sources */,
 				6BD34CAB2566A5B6004C9CDA /* WMDownloadCacheManager.m in Sources */,
 				6003F59E195388D20070C39A /* WMAppDelegate.m in Sources */,
+				6BACC9AE25723EBD00585FDD /* WMAliSDkPlayerService.m in Sources */,
 				6BD34CA42566A4C9004C9CDA /* WMDownloadManager.m in Sources */,
 				6BD34CFC2567D3A9004C9CDA /* NSString+Path.m in Sources */,
 				6BD34CE225676CDA004C9CDA /* WMDownloadAdapter.m in Sources */,
 				6BD34CF52567C080004C9CDA /* WMDownloadCacheManager+WMFilePath.m in Sources */,
 				6003F5A7195388D20070C39A /* WMViewController.m in Sources */,
+				6BACC9A925723AC500585FDD /* WMProgress.m in Sources */,
 				6003F59A195388D20070C39A /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

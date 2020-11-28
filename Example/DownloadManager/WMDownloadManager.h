@@ -32,6 +32,20 @@ typedef void(^WMDownloadCompletionHandle)(WMDownloadAdapter *response);
 /// 取消所有网络请求
 + (void)cancelAllDownload;
 
+/// 暂停单个下载请求
+/// @param download 下载对象
++ (void)pauseDownload:(WMDownloadAdapter *)download;
+
+/// 暂停所有下载请求
++ (void)pauseAllDownload;
+
+/// 断点续传单个请求
+/// @param download 下载对象
++ (void)resumeDownload:(WMDownloadAdapter *)download;
+
+/// 断点徐闯所有下载
++ (void)resumeAllDownload;
+
 @end
 
 NS_ASSUME_NONNULL_END
