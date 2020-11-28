@@ -87,7 +87,7 @@
 /// @param response 返回数据
 /// @param filePath 存储下载数据文件路径
 /// @param error 下载失败
-- (void)responseAdapterWithResult:(NSURLResponse *)response
+- (void)responseAdapterWithResult:(NSURLResponse *)response TempFilePath:(NSString *)TempFilePath
                          filePath:(NSString *)filePath
                             error:(NSError *)error {
     if ([filePath isKindOfClass:[NSString class]]){
@@ -95,6 +95,21 @@
     } else if ([filePath isKindOfClass:[NSURL class]]){
         NSURL *url = (NSURL *)filePath;
         _filePath = url.absoluteString;
+    }
+    
+    /// 下载完成拷贝
+    BOOL success = [WMDownloadCacheManager moveItemAtPath:TempFilePath toPath:filePath];
+    if (success == false) { /// 拷贝失败，先删掉文件再试一次
+        [WMDownloadCacheManager removeItemAtPath:filePath];
+        [WMDownloadCacheManager moveItemAtPath:TempFilePath toPath:filePath];
+    }
+    
+    /// 解压
+    if (filePath.exists) {
+        /// 解压缩包
+        [WMDownloadCacheManager unzipDownloadFile:filePath unzipHandle:^(NSString * _Nonnull unZipPath) {
+            _unZipFilePath = unZipPath;
+        }];
     }
     
     if (error) { /// 下载失败处理
@@ -106,10 +121,6 @@
 - (void)downloadFail:(NSString *)filePath error:(NSError *)error response:(NSURLResponse *)response{
     _error = error;
     NSLog(@"😂😂😂 %@ 请求失败 (地址 ===> %@) ===> statusCode: %zd",self ,response.URL.absoluteString,error.code);
-    /// 下载失败删除本地数据
-    if (filePath.exists){
-        [WMDownloadCacheManager removeItemAtPath:filePath];
-    }
     
     if (error.code == -999){ /// 取消下载
         _msg = @"取消下载";
@@ -124,10 +135,6 @@
     if (filePath){
         _msg = @"下载成功";
         _respStatus = WMDownloadResponseStatusSuccess;
-        /// 解压缩包
-        [WMDownloadCacheManager unzipDownloadFile:filePath unzipHandle:^(NSString * _Nonnull unZipPath) {
-            _unZipFilePath = unZipPath;
-        }];
     } else {
         _msg = @"缓存失败";
         _respStatus = WMDownloadResponseStatusNoSpace;

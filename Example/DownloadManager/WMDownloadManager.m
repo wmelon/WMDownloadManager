@@ -92,15 +92,7 @@ static NSMutableDictionary<NSNumber * ,WMDownloadAdapter *> *_requestRecord;
         
         dispatch_async(dispatch_get_main_queue(), ^{
             /// 下载完成处理
-            [downloadAdapter responseAdapterWithResult:response filePath:filePath error:error];
-            
-            /// 下载完成拷贝
-            BOOL success = [WMDownloadCacheManager moveItemAtPath:TempFilePath toPath:filePath];
-            if (success == false) { /// 拷贝失败，先删掉文件再试一次
-                [WMDownloadCacheManager removeItemAtPath:filePath];
-                [WMDownloadCacheManager moveItemAtPath:TempFilePath toPath:filePath];
-            }
-            
+            [downloadAdapter responseAdapterWithResult:response TempFilePath:TempFilePath filePath:filePath error:error];
             if (complete){
                 complete(downloadAdapter);
             }

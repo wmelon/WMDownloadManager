@@ -85,7 +85,7 @@ typedef NS_ENUM(NSInteger, WMDownloadResponseStatus) {
 /// @param task 请求task
 /// @param filePath 存储下载数据文件路径
 /// @param error 下载失败
-- (void)responseAdapterWithResult:(NSURLResponse *)response
+- (void)responseAdapterWithResult:(NSURLResponse *)response TempFilePath:(NSString *)TempFilePath
                          filePath:(NSString *)filePath
                             error:(NSError *)error;
 

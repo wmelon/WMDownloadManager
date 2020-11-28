@@ -82,11 +82,11 @@ typedef NS_ENUM(NSInteger,WMButtonStatus) {
 //    return;
     
 
-    NSString *url = @"https://image.zmlearn.com/coursewarezmgx/package/mp4/20200401/bdec5ae9e67a4e1193b694a03dda1f87.mp4";
+//    NSString *url = @"https://image.zmlearn.com/coursewarezmgx/package/mp4/20200401/bdec5ae9e67a4e1193b694a03dda1f87.mp4";
     
 //    NSString *url = @"https://rs.hdkj.zmlearn.com/coursewarezmgx-fat/zmg2/p_9f7b2874-908d-4d6c-a849-6f411cba7c9d/4/p_9f7b2874-908d-4d6c-a849-6f411cba7c9d.zip";
     
-//    NSString *url = @"https://rs.hdkj.zmlearn.com/coursewarezmgx-fat/zmg2/renderer/genius/homework/sdk/12271/20201116-003/1605518812186/product.zip";
+    NSString *url = @"https://rs.hdkj.zmlearn.com/coursewarezmgx-fat/zmg2/renderer/genius/homework/sdk/12271/20201116-003/1605518812186/product.zip";
     
     
 //    NSString *url = @"http://dldir1.qq.com/qqfile/QQforMac/QQ_V5.4.0.dmg";
