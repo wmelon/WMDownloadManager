@@ -13,13 +13,14 @@
 NS_ASSUME_NONNULL_BEGIN
 
 typedef NS_ENUM(NSInteger, WMDownloadResponseStatus) {
-    WMDownloadResponseStatusDefault = 0,        //初始状态
-    WMDownloadResponseStatusSuccess,            //成功
-    WMDownloadResponseStatusProgress,           //正在请求中
-    WMDownloadResponseStatusPause,              //暂停下载
-    WMDownloadResponseStatusCancel,             //已经取消
-    WMDownloadResponseStatusFailure,            //失败
-    WMDownloadResponseStatusNoSpace,            //手机空间不足
+    WMDownloadResponseStatusDefault = 1 << 0,        //初始状态
+    WMDownloadResponseStatusSuccess = 1 << 1,            //成功
+    WMDownloadResponseStatusProgress = 1 << 2,           //正在请求中
+    WMDownloadResponseStatusPause = 1 << 3,              //暂停下载
+    WMDownloadResponseStatusCancel = 1 << 4,             //已经取消
+    WMDownloadResponseStatusFailure = 1 << 5,            //失败
+    WMDownloadResponseStatusComplete = 1 << 6,           //请求完成
+    WMDownloadResponseStatusNoSpace = 1 << 7,            //手机空间不足
 };
 
 @interface WMDownloadAdapter : NSObject

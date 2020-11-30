@@ -15,10 +15,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface WMDownloadCacheManager : NSObject
 
-/// 根据下载地址获取文件名
-/// @param url 下载地址  地址经过MD5加密作为文件名
-+ (NSString *)filenameWithDownloadUrl:(NSString *)url;
-
 /// 向目录文件下写入data数据
 /// @param receiveData 下载的data数据
 /// @param dictPath 文件目录

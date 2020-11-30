@@ -14,6 +14,9 @@ NS_ASSUME_NONNULL_BEGIN
 /// 下载完成回调
 typedef void(^WMDownloadCompletionHandle)(WMDownloadAdapter *response);
 
+/// 批量下载完成回调
+typedef void(^WMBatchDownloadCompletionHandle)(NSArray<WMDownloadAdapter *> *responses);
+
 @interface WMDownloadManager : NSObject
 
 /// 单个下载请求
@@ -21,10 +24,11 @@ typedef void(^WMDownloadCompletionHandle)(WMDownloadAdapter *response);
 /// @param downloadAdapter 下载数据结构体
 + (void)downloadWithcomplete:(WMDownloadCompletionHandle)complete downloadAdapter:(WMDownloadAdapter *)downloadAdapter;
 
+#warning ---- 批量下载还有问题，后续看怎么优化
 /// 批量下载
 /// @param complete 所有完成请求回调  其中一个下载失败不会影响其它下载项
 /// @param downloadAdapter 下载请求结构体
-+ (void)batchDownloadWithComplete:(WMDownloadCompletionHandle)complete downloadAdapter:(WMDownloadAdapter *)downloadAdapter , ... NS_REQUIRES_NIL_TERMINATION;
+//+ (void)batchDownloadWithComplete:(WMBatchDownloadCompletionHandle)complete downloadAdapter:(WMDownloadAdapter *)downloadAdapter , ... NS_REQUIRES_NIL_TERMINATION;
 
 /// 取消单个下载请求
 + (void)cancelDownload:(WMDownloadAdapter *)download;

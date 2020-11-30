@@ -114,9 +114,45 @@ static NSMutableDictionary<NSNumber * ,WMDownloadAdapter *> *_requestRecord;
 /// 批量下载
 /// @param complete 所有完成请求回调  其中一个下载失败不会影响其它下载项
 /// @param downloadAdapter 下载请求结构体
-+ (void)batchDownloadWithComplete:(WMDownloadCompletionHandle)complete downloadAdapter:(WMDownloadAdapter *)downloadAdapter , ... NS_REQUIRES_NIL_TERMINATION {
-    
-}
+//+ (void)batchDownloadWithComplete:(WMBatchDownloadCompletionHandle)complete downloadAdapter:(WMDownloadAdapter *)downloadAdapter , ... NS_REQUIRES_NIL_TERMINATION {
+//    /// 获取所有的请求
+//    id eachObject;
+//    va_list argumentList;
+//    NSMutableArray<WMDownloadAdapter *> *requestArray;
+//    if (downloadAdapter){
+//        requestArray = [NSMutableArray arrayWithObjects:downloadAdapter, nil];
+//        va_start(argumentList, downloadAdapter);
+//        while ((eachObject = va_arg(argumentList, id))) {
+//            [requestArray addObject:eachObject];
+//        }
+//        va_end(argumentList);
+//    }
+//    [self addBatchRequests:requestArray completeHandler:complete];
+//}
+//+ (void)addBatchRequests:(NSArray<WMDownloadAdapter *> *)requestArray
+//                    completeHandler:(WMBatchDownloadCompletionHandle)completeHandler {
+//
+//    dispatch_group_t group = dispatch_group_create();
+//    for (WMDownloadAdapter *request in requestArray) {
+//        /// 有多少个请求完成标识就得有多少个请求等待
+//        /// 批量异步下载  同步更新不需要只要请求进度
+//        dispatch_group_enter(group);
+//        ///
+//        [self downloadWithcomplete:^(WMDownloadAdapter * _Nonnull response) {
+//            /// 单个网络完成
+//            if (response.respStatus == WMDownloadResponseStatusComplete) {
+//                dispatch_group_leave(group);
+//            }
+//        } downloadAdapter:request];
+//    }
+//    /// 所有请求完成之后的回调 请求对象就是返回对象
+//    dispatch_group_notify(group, dispatch_get_main_queue(), ^(){
+//        if (completeHandler){
+//            completeHandler(requestArray);
+//        }
+//    });
+//}
+
 #pragma mark -- 下载状态变更相关方法
 
 /// 取消单个下载请求

@@ -46,19 +46,19 @@ typedef NS_ENUM(NSInteger,WMButtonStatus) {
     if (self.type == WMButtonStatus_start){ /// 开始下载
         [self.btn setTitle:@"暂停下载" forState:(UIControlStateNormal)];
         self.type = WMButtonStatus_pause;
-        
+
         [self downloadMp4];
-        
+
     } else if (self.type == WMButtonStatus_pause) {
         [self.btn setTitle:@"继续下载" forState:(UIControlStateNormal)];
         self.type = WMButtonStatus_resume;
-        
+
         [WMDownloadManager pauseDownload:self.download];
-        
+
     } else if (self.type == WMButtonStatus_resume) {
         self.type = WMButtonStatus_pause;
         [self.btn setTitle:@"暂停下载" forState:(UIControlStateNormal)];
-        
+
         [self resumeDownload];
     }
 }
@@ -70,6 +70,42 @@ typedef NS_ENUM(NSInteger,WMButtonStatus) {
 
 - (void)resumeDownload {
     [WMDownloadManager resumeDownload:self.download];
+}
+- (void)batchDownload {
+    
+//    NSString *mp4Url = @"https://image.zmlearn.com/coursewarezmgx/package/mp4/20200401/bdec5ae9e67a4e1193b694a03dda1f87.mp4";
+//    NSString *zipUrl = @"https://rs.hdkj.zmlearn.com/coursewarezmgx-fat/zmg2/p_9f7b2874-908d-4d6c-a849-6f411cba7c9d/4/p_9f7b2874-908d-4d6c-a849-6f411cba7c9d.zip";
+//    NSString *dmgUrl = @"http://dldir1.qq.com/qqfile/QQforMac/QQ_V5.4.0.dmg";
+//
+//
+//    NSString *zipDict = [WMDownloadCacheManager previewPathWith:@"lessonId001" resourceId:@"resourceId002" version:@"version_2.3.0---0"];
+//    NSString *mp4Dict = [WMDownloadCacheManager previewPathWith:@"lessonId001" resourceId:@"resourceId002" version:@"version_2.3.0---1"];
+//    NSString *dmgDict = [WMDownloadCacheManager previewPathWith:@"lessonId001" resourceId:@"resourceId002" version:@"version_2.3.0---2"];
+//
+//
+//    WMDownloadAdapter *mp4Down = [WMDownloadAdapter downloadWithUrl:mp4Url];
+//    [mp4Down configDirecPath:mp4Dict];
+//
+//    WMDownloadAdapter *zipDown = [WMDownloadAdapter downloadWithUrl:zipUrl];
+//    [zipDown configDirecPath:zipDict];
+//
+//    WMDownloadAdapter *dmgDown = [WMDownloadAdapter downloadWithUrl:dmgUrl];
+//    [dmgDown configDirecPath:dmgDict];
+//
+//    [WMDownloadManager batchDownloadWithComplete:^(NSArray<WMDownloadAdapter *> * _Nonnull responses) {
+//        if (mp4Down.respStatus == WMDownloadResponseStatusSuccess) {
+//            NSLog(@"mp4Down  ---- filePath ===== %@",mp4Down.filePath);
+//        }
+//        if (zipDown.respStatus == WMDownloadResponseStatusSuccess) {
+//            NSLog(@"zipDown  ---- filePath ===== %@",zipDown.filePath);
+//        }
+//        if (dmgDown.respStatus == WMDownloadResponseStatusSuccess) {
+//            NSLog(@"dmgDown  ---- filePath ===== %@",dmgDown.filePath);
+//        }
+//    } downloadAdapter:mp4Down,zipDown,dmgDown, nil];
+//    [self autoCancelOnDealloc:mp4Down];
+//    [self autoCancelOnDealloc:zipDown];
+//    [self autoCancelOnDealloc:dmgDown];
 }
 - (void)downloadMp4{
     
@@ -100,7 +136,7 @@ typedef NS_ENUM(NSInteger,WMButtonStatus) {
     self.download = download;
     /// 开启下载文件
     [WMDownloadManager downloadWithcomplete:^(WMDownloadAdapter * _Nonnull response) {
-        if (response.respStatus == WMDownloadResponseStatusProgress) {
+        if (response.respStatus & WMDownloadResponseStatusProgress) {
             
             CGFloat currentLength = response.progress.completedUnitCount;
             CGFloat fileLength = response.progress.totalUnitCount;
@@ -114,7 +150,7 @@ typedef NS_ENUM(NSInteger,WMButtonStatus) {
                 weakSelf.progressLabel.text = [NSString stringWithFormat:@"当前下载进度:%.2f%%",response.progress.fractionCompleted];
             }
 
-        } else if (response.respStatus == WMDownloadResponseStatusSuccess) {
+        } else if (response.respStatus & WMDownloadResponseStatusSuccess) {
             NSLog(@"direcPath ===   %@",response.direcPath);
             NSLog(@"filepath ===   %@",response.filePath);
             NSLog(@"zipPath ===   %@",response.unZipFilePath);
@@ -125,8 +161,11 @@ typedef NS_ENUM(NSInteger,WMButtonStatus) {
                 [weakSelf.btn setTitle:@"下载失败" forState:(UIControlStateNormal)];
             }
             
-        } else if (response.respStatus == WMDownloadResponseStatusFailure) {
+        } else if (response.respStatus & WMDownloadResponseStatusFailure) {
             NSLog(@"%@",response.error);
+        }
+        if (response.respStatus & WMDownloadResponseStatusComplete){
+            NSLog(@"1213131------");
         }
     } downloadAdapter:download];
     /// 界面销毁停止请求

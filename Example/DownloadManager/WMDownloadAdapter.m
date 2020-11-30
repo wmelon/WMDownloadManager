@@ -111,7 +111,7 @@
             _unZipFilePath = unZipPath;
         }];
     }
-    
+
     if (error) { /// 下载失败处理
         [self downloadFail:_filePath error:error response:response];
     } else {  /// 下载成功处理
@@ -124,20 +124,20 @@
     
     if (error.code == -999){ /// 取消下载
         _msg = @"取消下载";
-        _respStatus = WMDownloadResponseStatusCancel;
+        _respStatus = WMDownloadResponseStatusCancel | WMDownloadResponseStatusComplete;
     } else {
         _msg = @"下载失败";
-        _respStatus = WMDownloadResponseStatusFailure;
+        _respStatus = WMDownloadResponseStatusFailure | WMDownloadResponseStatusComplete;
     }
 }
 - (void)downloadSuccess:(NSString *)filePath response:(NSURLResponse *)response{
     NSLog(@"😄😄😄 %@ 请求成功  (地址 ===> %@)",self ,response.URL.absoluteString);
     if (filePath){
         _msg = @"下载成功";
-        _respStatus = WMDownloadResponseStatusSuccess;
+        _respStatus = WMDownloadResponseStatusSuccess | WMDownloadResponseStatusComplete;
     } else {
         _msg = @"缓存失败";
-        _respStatus = WMDownloadResponseStatusNoSpace;
+        _respStatus = WMDownloadResponseStatusNoSpace | WMDownloadResponseStatusComplete;
     }
 }
 /// 取消单个下载请求
