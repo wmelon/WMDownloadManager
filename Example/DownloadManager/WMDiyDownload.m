@@ -63,6 +63,7 @@
 //    }
 //    return baseUrl;
 //}
+
 #pragma mark -- 重写的方法
 - (NSDictionary *)getRequestPublicParameter {
     return [self publicParamConfig];

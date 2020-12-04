@@ -21,15 +21,6 @@ static NSString *const kAiPlayer     = @"aiPlayer";
 
 @implementation WMDownloadCacheManager (WMFilePath)
 
-/// 检查字符串是否为空
-/// @param string 字符串
-+ (BOOL)checkStringIsEmpty:(NSString *)string {
-    if (!string || ![string isKindOfClass:[NSString class]] || string == (id)kCFNull || [string isEqualToString:@""]) {
-        return true;
-    }
-    return false;
-}
-
 /// 预习课存储地址
 /// @param lessonId 课程id
 /// @param resourceId 源数据id
@@ -38,9 +29,9 @@ static NSString *const kAiPlayer     = @"aiPlayer";
 + (NSString *)previewPathWith:(NSString *)lessonId resourceId:(NSString *)resourceId version:(NSString *)version   {
      
     NSString *dirPreview = [WMDownload_resource_history_cache_PATH stringByAppendingPathComponent:kPreview];
-    NSString *dirLesson = [dirPreview stringByAppendingPathComponent:[NSString stringWithFormat:@"%@", [self MD5:lessonId]]];
-    NSString *dirID = [dirLesson stringByAppendingPathComponent:[NSString stringWithFormat:@"%@", [self MD5:resourceId]]];
-    NSString *dirVersion = [dirID stringByAppendingPathComponent:[NSString stringWithFormat:@"%@", [self MD5:version]]];
+    NSString *dirLesson = [dirPreview stringByAppendingPathComponent:[NSString stringWithFormat:@"%@", [lessonId MD5]]];
+    NSString *dirID = [dirLesson stringByAppendingPathComponent:[NSString stringWithFormat:@"%@", [resourceId MD5]]];
+    NSString *dirVersion = [dirID stringByAppendingPathComponent:[NSString stringWithFormat:@"%@", [version MD5]]];
      
     return dirVersion;
 }

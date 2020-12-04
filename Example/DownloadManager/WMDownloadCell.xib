@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="17506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17505"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="WMDownloadCell" rowHeight="115" id="KGk-i7-Jjw" customClass="WMDownloadCell">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="100"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+                <rect key="frame" x="0.0" y="0.0" width="320" height="100"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="WXx-4m-QQh">
+                        <rect key="frame" x="263" y="15" width="37" height="34"/>
+                        <state key="normal" title="开始">
+                            <color key="titleColor" systemColor="labelColor"/>
+                        </state>
+                        <connections>
+                            <action selector="downloadAction:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="j1F-5V-EBx"/>
+                        </connections>
+                    </button>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0.00%" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="NgX-Am-27F">
+                        <rect key="frame" x="20" y="54" width="42" height="17"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="1kb/s" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ill-Yj-em1">
+                        <rect key="frame" x="82" y="54" width="34" height="17"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="779-aS-32K">
+                        <rect key="frame" x="20" y="30" width="223" height="4"/>
+                    </progressView>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="ill-Yj-em1" firstAttribute="centerY" secondItem="NgX-Am-27F" secondAttribute="centerY" id="7Uo-su-VBh"/>
+                    <constraint firstAttribute="trailing" secondItem="WXx-4m-QQh" secondAttribute="trailing" constant="20" id="8eC-M9-upk"/>
+                    <constraint firstItem="WXx-4m-QQh" firstAttribute="leading" secondItem="779-aS-32K" secondAttribute="trailing" constant="20" id="GEU-Al-UW5"/>
+                    <constraint firstItem="NgX-Am-27F" firstAttribute="top" secondItem="779-aS-32K" secondAttribute="bottom" constant="20" id="J5N-f1-BRh"/>
+                    <constraint firstItem="779-aS-32K" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="30" id="KL8-M4-XVq"/>
+                    <constraint firstItem="779-aS-32K" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="20" id="auE-6M-QoT"/>
+                    <constraint firstItem="WXx-4m-QQh" firstAttribute="centerY" secondItem="779-aS-32K" secondAttribute="centerY" id="iF5-k3-fNT"/>
+                    <constraint firstItem="NgX-Am-27F" firstAttribute="leading" secondItem="779-aS-32K" secondAttribute="leading" id="msA-3N-hJr"/>
+                    <constraint firstItem="ill-Yj-em1" firstAttribute="leading" secondItem="NgX-Am-27F" secondAttribute="trailing" constant="20" id="naE-m5-l3o"/>
+                </constraints>
+            </tableViewCellContentView>
+            <viewLayoutGuide key="safeArea" id="aW0-zy-SZf"/>
+            <connections>
+                <outlet property="progressLabel" destination="NgX-Am-27F" id="Ghd-BV-CxP"/>
+                <outlet property="progressView" destination="779-aS-32K" id="K2t-ly-uda"/>
+                <outlet property="speedLabel" destination="ill-Yj-em1" id="7B3-sX-otT"/>
+                <outlet property="startBtn" destination="WXx-4m-QQh" id="aX7-qz-qhv"/>
+            </connections>
+            <point key="canvasLocation" x="121.73913043478262" y="124.21875"/>
+        </tableViewCell>
+    </objects>
+    <resources>
+        <systemColor name="labelColor">
+            <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>

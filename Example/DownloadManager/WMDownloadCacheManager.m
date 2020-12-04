@@ -7,13 +7,17 @@
 //
 
 #import "WMDownloadCacheManager.h"
-#import <CommonCrypto/CommonDigest.h>
 
 @import SSZipArchive;
 
-NSString *const zb_defaultCachePathName =@"AppCache";
+#define Lock() dispatch_semaphore_wait(self->_lock, DISPATCH_TIME_FOREVER)
+#define Unlock() dispatch_semaphore_signal(self->_lock)
 
-@interface WMDownloadCacheManager()
+NSString *const WM_defaultCachePathName =@"AppCache";
+
+@interface WMDownloadCacheManager(){
+    dispatch_semaphore_t _lock;
+}
 /// 内存缓存
 @property (nonatomic, strong) NSCache *memoryCache;
 /// 文件操作队列
@@ -33,99 +37,99 @@ NSString *const zb_defaultCachePathName =@"AppCache";
 
 - (instancetype)init {
     if (self = [super init]) {
-        NSString *memoryNameSpace = [@"memory.ZBCacheManager" stringByAppendingString:zb_defaultCachePathName];
+        NSString *memoryNameSpace = [@"memory.WMCacheManager" stringByAppendingString:WM_defaultCachePathName];
         
         _memoryCache = [[NSCache alloc] init];
         _memoryCache.name = memoryNameSpace;
+        _lock = dispatch_semaphore_create(1);
         
-        _operationQueue = dispatch_queue_create("dispatch.ZBCacheManager", DISPATCH_QUEUE_SERIAL);
+        _operationQueue = dispatch_queue_create("dispatch.WMCacheManager", DISPATCH_QUEUE_SERIAL);
     }
     return self;
 }
 
-#pragma mark -- private method
-/// 检查字符串是否为空
-/// @param string 字符串
-+ (BOOL)checkStringIsEmpty:(NSString *)string {
-    if (!string || ![string isKindOfClass:[NSString class]] || string == (id)kCFNull || [string isEqualToString:@""]) {
-        return true;
-    }
-    return false;
-}
-/// 字符串MD5加密
-/// @param string 需要加密的字符串
-+ (NSString *)MD5:(NSString *)string {
-    const char* str = [string UTF8String];
-    unsigned char result[CC_MD5_DIGEST_LENGTH];
-    CC_MD5(str, (CC_LONG)strlen(str), result);
-    NSMutableString *ret = [NSMutableString stringWithCapacity:CC_MD5_DIGEST_LENGTH*2];
-    for(int i = 0; i<CC_MD5_DIGEST_LENGTH; i++) {
-        [ret appendFormat:@"%02x",result[i]];
-    }
-    return [ret lowercaseString];
-}
 #pragma mark -- public method
 
-/// 临时文件路径
-/// @param url 下载地址
-+ (NSString *)tempFilenameWithDownloadUrl:(NSString *)url {
-    NSString *tempFilename = [NSString stringWithFormat:@"%@.tmp", [self MD5:url]];
-    return tempFilename;
-}
-
-/// 删除本地存在的文件
+/// 删除文件数据
 /// @param filePath 文件路径
-+ (void)removeItemAtPath:(NSString *)filePath {
+/// @param isSuccess 移除结果回调
+- (void)removeItemAtPath:(NSString *)filePath isSuccess:(void(^)(BOOL isSuccess))isSuccess {
     if (filePath.exists) {
-        [[NSFileManager defaultManager] removeItemAtPath:filePath error:nil];
+        Lock();
+        BOOL result = [[NSFileManager defaultManager] removeItemAtPath:filePath error:nil];
+        if (isSuccess) {
+            isSuccess(result);
+        }
+        Unlock();
     }
 }
 /// 清除所有下载缓存数据
-+ (void)removeAllItems {
+- (void)removeAllItems {
     if (WMDownload_resource_history_cache_PATH.exists){
+        Lock();
         [[NSFileManager defaultManager] removeItemAtPath:WMDownload_resource_history_cache_PATH error:nil];
+        Unlock();
     }
 }
 
 /// 下载数据存储文件路径
-/// @param filePath 外部传入文件路径 , 可能为空，为空直接使用默认地址
+/// @param dictPath 外部传入文件路径
 /// @param url  下载数据的地址
-+ (NSString *)createTempFilePathWithDictPath:(NSString *)dictPath url:(NSString *)url {
+- (NSString *)createTempFilePathWithDictPath:(NSString *)dictPath url:(NSString *)url {
+    NSAssert(![url checkStringIsEmpty], @"下载地址不能为空");
+    
     /// 文件存储路径不存在，使用默认路径
-    if ([self checkStringIsEmpty:dictPath]) {
+    if ([dictPath checkStringIsEmpty]) {
         dictPath = WMDownload_resource_history_cache_PATH;
     }
-    /// 文件地址
-    NSString *filePath  = [dictPath stringByAppendingPathComponent:[self tempFilenameWithDownloadUrl:url]];
-    /// 创建文件
-    if (![filePath exists]){ /// 文件路径不存在才创建文件
-        [filePath createFile];
+    
+    /// 数据已经下载完成不再创建临时文件
+    if ([self getFilePathWithDirecPath:dictPath url:url].exists){
+        return @"";
     }
-    return filePath;
+    
+    /// 临时文件创建
+    NSString *tempFilename = [NSString stringWithFormat:@"%@.tmp", [url MD5]];
+    NSString *tempFilePath = [dictPath stringByAppendingPathComponent:tempFilename];
+    /// 创建文件
+    if (![tempFilePath exists]){ /// 文件路径不存在才创建文件
+        Lock();
+        [tempFilePath createFile];
+        Unlock();
+    }
+    return tempFilePath;
 }
 
 /// 获取下载完成地址
-/// @param tempFilePath 临时数据地址
-+ (NSString *)getFilePathWithTempFilePath:(NSString *)tempFilePath url:(NSString *)url {
-    NSString *filePath = [NSString stringWithFormat:@"%@.%@",tempFilePath.namePath,url.pathExtension];
+/// @param direcPath 临时数据地址
+/// @param url 下载数据地址
+- (NSString *)getFilePathWithDirecPath:(NSString *)direcPath url:(NSString *)url {
+    NSAssert(![direcPath checkStringIsEmpty], @"文件路径不能为空");
+    NSAssert(![url checkStringIsEmpty], @"下载地址不能为空");
+    
+    NSString *namePath = [NSString stringWithFormat:@"%@.%@", [url MD5],url.pathExtension];
+    NSString *filePath = [direcPath stringByAppendingPathComponent:namePath];
     return filePath;
 }
 
 /// 解压zip文件
 /// @param filePath 文件本地存储路径
-+ (void)unzipDownloadFile:(NSString *)filePath unzipHandle:(void(^)(NSString *unZipPath))handle{
+- (void)unzipDownloadFile:(NSString *)filePath unzipHandle:(void(^)(NSString *unZipPath))handle{
     if (![filePath.extension isEqualToString:@"zip"]){
         return;
     }
     /// 只有zip文件才解压
     if (filePath.exists){ /// 文件存在
-        NSString *toPath = [filePath.prefix stringByAppendingPathComponent:[self MD5:filePath.name]];
-        __weak typeof(self) weakself = self;
+        NSString *toPath = [filePath.prefix stringByAppendingPathComponent:[filePath.name MD5]];
         [SSZipArchive unzipFileAtPath:filePath toDestination:toPath overwrite:YES password:nil progressHandler:^(NSString * _Nonnull entry, unz_file_info zipInfo, long entryNumber, long total) {
         } completionHandler:^(NSString * _Nonnull path, BOOL succeeded, NSError * _Nullable error) {
             if (error) { /// 解压失败删除本地解压数据
                 NSLog(@"解压失败  ---- filePath === %@",filePath);
-                [weakself removeItemAtPath:toPath];
+                [[WMDownloadCacheManager sharedInstance] removeItemAtPath:toPath isSuccess:^(BOOL isSuccess) {
+                    if (isSuccess == false){
+                        NSLog(@"删除文件失败  ----- %@",filePath);
+                    }
+                }];
             } else {  /// 解压成功
                 if (handle){
                     handle(toPath);
@@ -144,7 +148,7 @@ NSString *const zb_defaultCachePathName =@"AppCache";
                 dictPath:(NSString *)dictPath
                      key:(NSString *)key
                isSuccess:(void(^)(BOOL isSuccess))isSuccess{
-    if (!receiveData || !key) {
+    if (!receiveData || !key || !dictPath) {
         if (isSuccess) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 isSuccess(NO);
@@ -158,7 +162,9 @@ NSString *const zb_defaultCachePathName =@"AppCache";
         BOOL result = [self setContent:receiveData writeToFile:dictPath];
         if (isSuccess) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                isSuccess(result);
+                if (isSuccess) {
+                    isSuccess(result);
+                }
             });
         }
     });
@@ -181,6 +187,7 @@ NSString *const zb_defaultCachePathName =@"AppCache";
 /// @param key 一般是下载url地址
 - (NSData *)getCacheDataWithPath:(NSString *)path key:(NSString *)key{
     if (!key) return nil;
+    if (!path) return  nil;
     NSData *obj = [self.memoryCache objectForKey:key];
     if (obj) {
         return obj;
@@ -191,6 +198,17 @@ NSString *const zb_defaultCachePathName =@"AppCache";
         }
        return diskdata;
     }
+}
+/// 删除断点下载数据
+/// @param path 地址
+/// @param key url
+- (void)removeCacheDataWithPath:(NSString *)path key:(NSString *)key {
+    if (!key || !path) return;
+    /// 先输出内存缓存
+    [self.memoryCache removeObjectForKey:key];
+    /// 再删除磁盘缓存
+    [self removeItemAtPath:path isSuccess:^(BOOL isSuccess) {
+    }];
 }
 
 @end

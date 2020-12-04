@@ -27,7 +27,7 @@
     // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
     // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
     // 实现如下代码，才能使程序处于后台时被杀死，调用applicationWillTerminate:方法
-    [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(){}];
+//    [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(){}];
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application
@@ -43,7 +43,7 @@
 - (void)applicationWillTerminate:(UIApplication *)application
 {
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
-    NSLog(@"程序被杀死，applicationWillTerminate");
+//    NSLog(@"程序被杀死，applicationWillTerminate");
 }
 
 @end

@@ -11,6 +11,7 @@
 #import "NSObject+WMAutoCancel.h"
 #import "WMDownloadCacheManager+WMFilePath.h"
 #import "WMDiyDownload.h"
+#import "ZMDownloadTableViewController.h"
 
 typedef NS_ENUM(NSInteger,WMButtonStatus) {
     WMButtonStatus_start,   /// 开始
@@ -43,13 +44,17 @@ typedef NS_ENUM(NSInteger,WMButtonStatus) {
 }
 /// 下载和暂停按钮
 - (void)downloadData:(UIButton *)button {
-    button.selected = !button.isSelected;
-    if (button.isSelected) {
-        [self downloadMp4];
-    } else {
-        [WMDownloadManager downloadStopWithRequest:self.download];
-    }
+    ZMDownloadTableViewController *vc = [ZMDownloadTableViewController new];
+    [self presentViewController:vc animated:YES completion:nil];
     
+    
+//    button.selected = !button.isSelected;
+//    if (button.isSelected) {
+//        [self downloadMp4];
+//    } else {
+//        [WMDownloadManager downloadStopWithRequest:self.download];
+//    }
+//    
 //    if (self.type == WMButtonStatus_start){ /// 开始下载
 //        [self.btn setTitle:@"暂停下载" forState:(UIControlStateNormal)];
 //        self.type = WMButtonStatus_pause;
@@ -71,7 +76,7 @@ typedef NS_ENUM(NSInteger,WMButtonStatus) {
 //    [self batchDownload];
 }
 - (void)clearAllData {
-    [WMDownloadCacheManager removeAllItems];
+    [[WMDownloadCacheManager sharedInstance] removeAllItems];
     self.type = WMButtonStatus_start;
     [self.btn setTitle:@"开始下载" forState:(UIControlStateNormal)];
 }

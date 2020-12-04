@@ -7,7 +7,6 @@
 //
 
 #import "WMDownloadAdapter.h"
-#import "WMDownloadCacheManager.h"
 
 @interface WMDownloadAdapter()
 @end
@@ -24,9 +23,42 @@
 - (instancetype)initWithUrl:(NSString *)downloadUrl direcPath:(NSString *)direcPath {
     if (self = [super init]) {
         _downloadUrl = downloadUrl;
+    
+        /// 可以为空，空的话就保底默认地址
         _direcPath = direcPath;
+        
+        /// 临时存储数据地址
+        NSString *downloadUrl = [self getReallyDownloadUrl:self.downloadUrl];
+        NSString *downloadTempPath = [[WMDownloadCacheManager sharedInstance] createTempFilePathWithDictPath:direcPath url:downloadUrl];
+        _downloadTempPath = downloadTempPath;
+        
+        /// 监听进入后台
+        __weak typeof(self) weakSelf = self;
+        [[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationDidEnterBackgroundNotification object:self queue:nil usingBlock:^(NSNotification * _Nonnull note) {
+            [weakSelf downloadStop];
+        }];
     }
     return self;
+}
+/// 暂停下载存储当前下载数据
+- (void)downloadStop {
+    NSURLSessionTask *task = self.sessionTask;
+    if ([task isKindOfClass:[NSURLSessionDownloadTask class]]){
+        NSURLSessionDownloadTask *downloadTask = (NSURLSessionDownloadTask *)task;
+        [downloadTask cancelByProducingResumeData:^(NSData *resumeData) {  ///
+            /// 下载地址
+            NSString *downloadUrl = [self getReallyDownloadUrl:self.downloadUrl];
+            
+            [[WMDownloadCacheManager sharedInstance] writeReceiveData:resumeData dictPath:self.downloadTempPath key:downloadUrl isSuccess:^(BOOL isSuccess) {
+                if (isSuccess) {
+                    NSLog(@"--------------------\n暂停下载请求，保存当前已下载文件进度\n\n-URLAddress-:%@\n\n-downloadFileDirectory-:%@\n-----------------",downloadUrl,self.downloadTempPath );
+                } else {
+                    NSLog(@"保存数据失败  ----- %@",self.downloadTempPath );
+                }
+            }];
+        }];
+    }
+    [self cancelDownload];
 }
 
 /// 请求参数  这个适用于确定字典不为空的情况
@@ -40,12 +72,12 @@
     [self.parameterDict setValue:value forKey:key];
 }
 
-- (NSString *)downloadTempPath {
-    return [WMDownloadCacheManager createTempFilePathWithDictPath:self.direcPath url:[self getReallyDownloadUrl:self.downloadUrl]];
-}
-
 - (NSString *)filePath{
-    return [WMDownloadCacheManager getFilePathWithTempFilePath:self.downloadTempPath url:[self getReallyDownloadUrl:self.downloadUrl]];
+    if (_filePath) {
+        return _filePath;
+    }
+    _filePath = [[WMDownloadCacheManager sharedInstance] getFilePathWithDirecPath:self.direcPath url:[self getReallyDownloadUrl:self.downloadUrl]];
+    return _filePath;
 }
 
 #pragma mark -- downloadmanager 需要使用的方法
@@ -74,6 +106,19 @@
 /// 请求公共参数  需要公共参数子类重写这个方法
 - (NSDictionary *)getRequestPublicParameter {
     return @{};
+}
+/// 获取上次缓存的数据
+- (NSData *)getResumeData {
+    /// 下载本地存储路径
+    NSString *tempFilePath = self.downloadTempPath;
+    
+    /// 下载地址
+    NSString *downloadUrl = [self getReallyDownloadUrl:self.downloadUrl];
+
+    /// 缓存数据
+    NSData *ResumeData = [[WMDownloadCacheManager sharedInstance] getCacheDataWithPath:tempFilePath key:downloadUrl];
+    
+    return ResumeData;
 }
 
 /// 请求进度处理
@@ -117,12 +162,12 @@
 }
 - (void)downloadSuccess:(NSString *)filePath TempFilePath:(NSString *)TempFilePath response:(NSURLResponse *)response{
     /// 下载完成移除临时文件
-    [WMDownloadCacheManager removeItemAtPath:TempFilePath];
+    [[WMDownloadCacheManager sharedInstance] removeCacheDataWithPath:TempFilePath key:[self getReallyDownloadUrl:self.downloadUrl]];
     
     /// 解压
     if (filePath.exists) {
         /// 解压缩包
-        [WMDownloadCacheManager unzipDownloadFile:filePath unzipHandle:^(NSString * _Nonnull unZipPath) {
+        [[WMDownloadCacheManager sharedInstance] unzipDownloadFile:filePath unzipHandle:^(NSString * _Nonnull unZipPath) {
             _unZipFilePath = unZipPath;
         }];
     }

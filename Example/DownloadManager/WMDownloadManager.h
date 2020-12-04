@@ -64,9 +64,6 @@ typedef void(^WMBatchDownloadCompletionHandle)(NSArray<WMDownloadAdapter *> *res
 ///// 断点续传所有下载
 //+ (void)resumeAllDownload;
 
-/// 不管哪一种方法停止下载都会调用这个方法，把已经下载的数据存储起来
-+ (void)downloadStopWithRequest:(WMDownloadAdapter*)download;
-
 @end
 
 NS_ASSUME_NONNULL_END

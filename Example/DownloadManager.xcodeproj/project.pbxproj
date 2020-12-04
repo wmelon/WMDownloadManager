@@ -22,6 +22,9 @@
 		6003F5B2195388D20070C39A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F591195388D20070C39A /* UIKit.framework */; };
 		6003F5BA195388D20070C39A /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 6003F5B8195388D20070C39A /* InfoPlist.strings */; };
 		6003F5BC195388D20070C39A /* Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 6003F5BB195388D20070C39A /* Tests.m */; };
+		6BA51F852579D1F1009B09BD /* ZMDownloadTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BA51F842579D1F1009B09BD /* ZMDownloadTableViewController.m */; };
+		6BA51F8B2579D70B009B09BD /* WMDownloadCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BA51F892579D70B009B09BD /* WMDownloadCell.m */; };
+		6BA51F8C2579D70B009B09BD /* WMDownloadCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 6BA51F8A2579D70B009B09BD /* WMDownloadCell.xib */; };
 		6BACC9A925723AC500585FDD /* WMProgress.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BACC9A825723AC500585FDD /* WMProgress.m */; };
 		6BACC9AE25723EBD00585FDD /* WMAliSDkPlayerService.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BACC9AD25723EBD00585FDD /* WMAliSDkPlayerService.m */; };
 		6BC42447257125A0006B8A2B /* WMDiyDownload.m in Sources */ = {isa = PBXBuildFile; fileRef = 6BC42446257125A0006B8A2B /* WMDiyDownload.m */; };
@@ -70,6 +73,11 @@
 		6003F5BB195388D20070C39A /* Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Tests.m; sourceTree = "<group>"; };
 		606FC2411953D9B200FFA9A0 /* Tests-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Tests-Prefix.pch"; sourceTree = "<group>"; };
 		6B1F047A5B33405D25AC6EFC /* DownloadManager.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = DownloadManager.podspec; path = ../DownloadManager.podspec; sourceTree = "<group>"; };
+		6BA51F832579D1F1009B09BD /* ZMDownloadTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZMDownloadTableViewController.h; sourceTree = "<group>"; };
+		6BA51F842579D1F1009B09BD /* ZMDownloadTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZMDownloadTableViewController.m; sourceTree = "<group>"; };
+		6BA51F882579D70B009B09BD /* WMDownloadCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WMDownloadCell.h; sourceTree = "<group>"; };
+		6BA51F892579D70B009B09BD /* WMDownloadCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WMDownloadCell.m; sourceTree = "<group>"; };
+		6BA51F8A2579D70B009B09BD /* WMDownloadCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = WMDownloadCell.xib; sourceTree = "<group>"; };
 		6BACC9A725723AC500585FDD /* WMProgress.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WMProgress.h; sourceTree = "<group>"; };
 		6BACC9A825723AC500585FDD /* WMProgress.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WMProgress.m; sourceTree = "<group>"; };
 		6BACC9AC25723EBD00585FDD /* WMAliSDkPlayerService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WMAliSDkPlayerService.h; sourceTree = "<group>"; };
@@ -185,6 +193,11 @@
 				6BC42446257125A0006B8A2B /* WMDiyDownload.m */,
 				6BACC9AC25723EBD00585FDD /* WMAliSDkPlayerService.h */,
 				6BACC9AD25723EBD00585FDD /* WMAliSDkPlayerService.m */,
+				6BA51F832579D1F1009B09BD /* ZMDownloadTableViewController.h */,
+				6BA51F842579D1F1009B09BD /* ZMDownloadTableViewController.m */,
+				6BA51F882579D70B009B09BD /* WMDownloadCell.h */,
+				6BA51F892579D70B009B09BD /* WMDownloadCell.m */,
+				6BA51F8A2579D70B009B09BD /* WMDownloadCell.xib */,
 			);
 			name = "Example for DownloadManager";
 			path = DownloadManager;
@@ -336,6 +349,7 @@
 				873B8AEB1B1F5CCA007FD442 /* Main.storyboard in Resources */,
 				71719F9F1E33DC2100824A3D /* LaunchScreen.storyboard in Resources */,
 				6003F5A9195388D20070C39A /* Images.xcassets in Resources */,
+				6BA51F8C2579D70B009B09BD /* WMDownloadCell.xib in Resources */,
 				6003F598195388D20070C39A /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -360,12 +374,14 @@
 				"${PODS_ROOT}/Target Support Files/Pods-DownloadManager_Example/Pods-DownloadManager_Example-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/AFNetworking/AFNetworking.framework",
 				"${BUILT_PRODUCTS_DIR}/SSZipArchive/SSZipArchive.framework",
+				"${BUILT_PRODUCTS_DIR}/YYCache/YYCache.framework",
 				"${BUILT_PRODUCTS_DIR}/DownloadManager/DownloadManager.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/AFNetworking.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SSZipArchive.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/YYCache.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DownloadManager.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -427,11 +443,13 @@
 				6BC42447257125A0006B8A2B /* WMDiyDownload.m in Sources */,
 				6BD34CEE2567A397004C9CDA /* NSObject+WMAutoCancel.m in Sources */,
 				6BD34CAB2566A5B6004C9CDA /* WMDownloadCacheManager.m in Sources */,
+				6BA51F8B2579D70B009B09BD /* WMDownloadCell.m in Sources */,
 				6003F59E195388D20070C39A /* WMAppDelegate.m in Sources */,
 				6BACC9AE25723EBD00585FDD /* WMAliSDkPlayerService.m in Sources */,
 				6BD34CA42566A4C9004C9CDA /* WMDownloadManager.m in Sources */,
 				6BD34CFC2567D3A9004C9CDA /* NSString+Path.m in Sources */,
 				6BD34CE225676CDA004C9CDA /* WMDownloadAdapter.m in Sources */,
+				6BA51F852579D1F1009B09BD /* ZMDownloadTableViewController.m in Sources */,
 				6BD34CF52567C080004C9CDA /* WMDownloadCacheManager+WMFilePath.m in Sources */,
 				6003F5A7195388D20070C39A /* WMViewController.m in Sources */,
 				6BACC9A925723AC500585FDD /* WMProgress.m in Sources */,

@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "AFHTTPSessionManager.h"
 #import "WMProgress.h"
+#import "WMDownloadCacheManager.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -88,6 +89,9 @@ typedef NS_ENUM(NSInteger, WMDownloadResponseStatus) {
 /**获取请求参数*/
 - (NSDictionary *)getRequestParameter;
 
+/// 获取上次缓存的数据
+- (NSData *)getResumeData;
+
 /// 请求公共参数
 - (NSDictionary *)getRequestPublicParameter;
 
@@ -95,8 +99,8 @@ typedef NS_ENUM(NSInteger, WMDownloadResponseStatus) {
 /// @param sessionTask 当前请求队列
 - (void)requestSessionTask:(NSURLSessionTask *)sessionTask;
 
-/// 取消单个下载请求
-- (void)cancelDownload;
+/// 暂停或者取消下载都
+- (void)downloadStop;
 
 @end
 

@@ -4,6 +4,7 @@ platform :ios, '8.0'
 
 pod 'AFNetworking'
 pod 'SSZipArchive', '1.8.1'
+pod 'YYCache'
 
 target 'DownloadManager_Example' do
   pod 'DownloadManager', :path => '../'

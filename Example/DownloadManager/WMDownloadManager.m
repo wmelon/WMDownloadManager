@@ -49,25 +49,27 @@ static NSMutableDictionary<NSNumber * ,WMDownloadAdapter *> *_requestRecord;
 /// @param complete 下载完成回调
 /// @param downloadAdapter 下载数据结构体
 + (void)downloadWithcomplete:(WMDownloadCompletionHandle)complete downloadAdapter:(WMDownloadAdapter *)downloadAdapter {
-    
     /// 请求地址
     NSString *downloadUrl = [downloadAdapter getReallyDownloadUrl:downloadAdapter.downloadUrl];
+    
+    if (downloadAdapter.downloadStatus == WMDownloadResponseStatusDownloading || downloadAdapter.filePath.exists){ /// 正在下载 或 需要下载的文件已经存在不再继续下载
+        return;
+    } else {  /// 开始下载
+        [self downloadStartWithRequest:downloadAdapter complete:complete downloadUrl:downloadUrl];
+    }
+}
+
++ (void)downloadStartWithRequest:(WMDownloadAdapter *)downloadAdapter complete:(WMDownloadCompletionHandle)complete downloadUrl:(NSString *)downloadUrl {
     
     /// 请求参数
     NSDictionary *paramer = [downloadAdapter getRequestParameter];
     
     NSLog(@">>>> %@ > %@ -> parameters %@",downloadUrl, @"Download" ,paramer);
     
-    /// 下载本地存储路径
-    NSString *TempFilePath = [self AppDownloadTempPath:downloadAdapter];
-    
-    /// 缓存数据
-    NSData *ResumeData = [[WMDownloadCacheManager sharedInstance] getCacheDataWithPath:TempFilePath key:downloadUrl];
-    
-    NSURLSessionDownloadTask *downloadTask = [self downloadWithRequest:downloadAdapter downloadUrl:downloadUrl resumeData:ResumeData savePath:[self AppDownloadTempPath:downloadAdapter] progress:^(NSProgress *downloadProgress) {
+    NSURLSessionDownloadTask *downloadTask = [self downloadWithRequest:downloadAdapter downloadUrl:downloadUrl resumeData:[downloadAdapter getResumeData] savePath:[self AppDownloadPath:downloadAdapter] progress:^(NSProgress *downloadProgress) {
+        /// 请求进度
+        [downloadAdapter responseAdapterWithProgress:downloadProgress];
         dispatch_async(dispatch_get_main_queue(), ^{
-            /// 请求进度
-            [downloadAdapter responseAdapterWithProgress:downloadProgress];
             if (complete){
                 complete(downloadAdapter);
             }
@@ -76,13 +78,15 @@ static NSMutableDictionary<NSNumber * ,WMDownloadAdapter *> *_requestRecord;
         /// 下载完成删除下载对象
         [self removeRequestFromRecord:downloadAdapter];
 
-        if (error){ /// 下载失败缓存已经下载数据
-            [self downloadStopWithRequest:downloadAdapter];
+        /// 下载失败缓存已经下载数据
+        if (error){
+            [self cancelDownload:downloadAdapter];
         }
-
+        
+        /// 下载完成处理
+        [downloadAdapter responseAdapterWithResult:response error:error];
+        
         dispatch_async(dispatch_get_main_queue(), ^{
-            /// 下载完成处理
-            [downloadAdapter responseAdapterWithResult:response error:error];
             if (complete){
                 complete(downloadAdapter);
             }
@@ -96,7 +100,6 @@ static NSMutableDictionary<NSNumber * ,WMDownloadAdapter *> *_requestRecord;
     /// 添加进下载数据结构中
     [self addRequestToRecord:downloadAdapter];
 }
-
 + (NSURLSessionDownloadTask *)downloadWithRequest:(WMDownloadAdapter *)downloadAdapter
                                       downloadUrl:(NSString *)downloadUrl
                                        resumeData:(NSData *)resumeData
@@ -176,11 +179,6 @@ static NSMutableDictionary<NSNumber * ,WMDownloadAdapter *> *_requestRecord;
     NSString *savePath = downloadAdapter.filePath;
     return savePath;
 }
-/// 下载文件缓存路径
-+ (NSString *)AppDownloadTempPath:(WMDownloadAdapter *)downloadAdapter {
-    NSString *downloadTempPath = downloadAdapter.downloadTempPath;
-    return downloadTempPath;
-}
 
 #pragma mark - 获取网络状态
 + (BOOL)isNetworkReachable{
@@ -197,20 +195,6 @@ static NSMutableDictionary<NSNumber * ,WMDownloadAdapter *> *_requestRecord;
 
 #pragma mark -- 下载状态变更相关方法
 
-/// 暂停下载存储当前下载数据
-+ (void)downloadStopWithRequest:(WMDownloadAdapter*)download {
-    NSURLSessionTask *task = download.sessionTask;
-    if ([task isKindOfClass:[NSURLSessionDownloadTask class]]){
-        NSURLSessionDownloadTask *downloadTask = (NSURLSessionDownloadTask *)task;
-        [downloadTask cancelByProducingResumeData:^(NSData *resumeData) {  ///
-            NSString *downloadTempPath = download.downloadTempPath;
-            [[WMDownloadCacheManager sharedInstance] writeReceiveData:resumeData dictPath:downloadTempPath key:download.downloadUrl isSuccess:^(BOOL isSuccess) {
-                NSLog(@"\n------------WMNetworking------download info------begin------\n暂停下载请求，保存当前已下载文件进度\n-URLAddress-:%@\n-downloadFileDirectory-:%@\n------------WMNetworking------download info-------end-------",download.downloadUrl,downloadTempPath);
-            }];
-        }];
-    }
-}
-
 /// 取消所有网络请求
 + (void)cancelAllDownload {
     [self downloadOperate:(WMDownloadResponseStatusDefault)];
@@ -226,8 +210,8 @@ static NSMutableDictionary<NSNumber * ,WMDownloadAdapter *> *_requestRecord;
 
 /// 取消单个下载请求
 + (void)cancelDownload:(WMDownloadAdapter *)download {
-    [download cancelDownload];
-    [self downloadStopWithRequest:download];
+    /// 必须在取消之前，不然无法获取到 resumeData
+    [download downloadStop];
     [self removeRequestFromRecord:download];
 }
 

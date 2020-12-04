@@ -32,4 +32,10 @@
 /// 创建文件
 - (BOOL)createFile;
 
+/// 检查字符串是否为空
+- (BOOL)checkStringIsEmpty;
+
+/// 字符串MD5加密
+- (NSString *)MD5;
+
 @end
