@@ -99,7 +99,10 @@ typedef NS_ENUM(NSInteger, WMDownloadResponseStatus) {
 /// @param sessionTask 当前请求队列
 - (void)requestSessionTask:(NSURLSessionTask *)sessionTask;
 
-/// 暂停或者取消下载都
+/// 取消下载
+- (void)cancelDownload;
+
+/// 暂停
 - (void)downloadStop;
 
 @end

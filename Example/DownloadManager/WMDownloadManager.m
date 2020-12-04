@@ -197,39 +197,6 @@ static NSMutableDictionary<NSNumber * ,WMDownloadAdapter *> *_requestRecord;
 
 /// 取消所有网络请求
 + (void)cancelAllDownload {
-    [self downloadOperate:(WMDownloadResponseStatusDefault)];
-}
-///// 暂停所有下载请求
-//+ (void)pauseAllDownload {
-//    [self downloadOperate:(WMDownloadResponseStatusPause)];
-//}
-///// 断点续传所有下载
-//+ (void)resumeAllDownload {
-//    [self downloadOperate:(WMDownloadResponseStatusProgress)];
-//}
-
-/// 取消单个下载请求
-+ (void)cancelDownload:(WMDownloadAdapter *)download {
-    /// 必须在取消之前，不然无法获取到 resumeData
-    [download downloadStop];
-    [self removeRequestFromRecord:download];
-}
-
-/// 暂停单个下载请求
-/// @param download 下载对象
-//+ (void)pauseDownload:(WMDownloadAdapter *)download {
-//    [download pauseDownload];
-//    [self downloadStopWithRequest:download];
-//}
-
-/// 断点续传单个请求
-/// @param download 下载对象
-//+ (void)resumeDownload:(WMDownloadAdapter *)download {
-//    [download resumeDownload];
-//}
-
-/// 处理网络请求操作
-+ (void)downloadOperate:(WMDownloadResponseStatus)status{
     NSArray *allKeys;
     @synchronized(self) {
         allKeys = [self.requestRecord allKeys];
@@ -241,21 +208,16 @@ static NSMutableDictionary<NSNumber * ,WMDownloadAdapter *> *_requestRecord;
             @synchronized(self) {
                 request = self.requestRecord[key];
             }
-            switch (status) {
-                case WMDownloadResponseStatusDefault:
-                    [self cancelDownload:request];
-                    break;
-//                case WMDownloadResponseStatusPause:
-//                    [self pauseDownload:request];
-//                    break;
-//                case WMDownloadResponseStatusProgress:
-//                    [self resumeDownload:request];
-//                    break;
-                default:
-                    break;
-            }
+            [self cancelDownload:request];
         }
     }
+}
+
+/// 取消单个下载请求
++ (void)cancelDownload:(WMDownloadAdapter *)download {
+    /// 必须在取消之前，不然无法获取到 resumeData
+    [download downloadStop];
+    [self removeRequestFromRecord:download];
 }
 
 #pragma mark -- 下载对象管理方法

@@ -75,7 +75,7 @@ NSString *const WM_defaultCachePathName =@"AppCache";
 /// 下载数据存储文件路径
 /// @param dictPath 外部传入文件路径
 /// @param url  下载数据的地址
-- (NSString *)createTempFilePathWithDictPath:(NSString *)dictPath url:(NSString *)url {
+- (NSString *)createTempFilePathWithDictPath:(NSString *)dictPath url:(NSString *)url pathExtension:(nonnull NSString *)pathExtension{
     NSAssert(![url checkStringIsEmpty], @"下载地址不能为空");
     
     /// 文件存储路径不存在，使用默认路径
@@ -89,7 +89,7 @@ NSString *const WM_defaultCachePathName =@"AppCache";
     }
     
     /// 临时文件创建
-    NSString *tempFilename = [NSString stringWithFormat:@"%@.tmp", [url MD5]];
+    NSString *tempFilename = [NSString stringWithFormat:@"%@.%@", [url MD5],pathExtension];
     NSString *tempFilePath = [dictPath stringByAppendingPathComponent:tempFilename];
     /// 创建文件
     if (![tempFilePath exists]){ /// 文件路径不存在才创建文件
@@ -99,6 +99,7 @@ NSString *const WM_defaultCachePathName =@"AppCache";
     }
     return tempFilePath;
 }
+
 
 /// 获取下载完成地址
 /// @param direcPath 临时数据地址
@@ -145,10 +146,11 @@ NSString *const WM_defaultCachePathName =@"AppCache";
 /// @param receiveData 下载的data数据
 /// @param dictPath 文件目录
 - (void)writeReceiveData:(NSData *)receiveData
-                dictPath:(NSString *)dictPath
-                     key:(NSString *)key
-               isSuccess:(void(^)(BOOL isSuccess))isSuccess{
-    if (!receiveData || !key || !dictPath) {
+            tempFilePath:(NSString *)tempFilePath
+        progressInfoData:(NSData *)progressInfoData
+        progressInfoPath:(NSString *)progressInfoPath
+               isSuccess:(void(^)(BOOL success))isSuccess {
+    if (!receiveData || !tempFilePath || !progressInfoData || !progressInfoPath) {
         if (isSuccess) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 isSuccess(NO);
@@ -156,10 +158,38 @@ NSString *const WM_defaultCachePathName =@"AppCache";
         }
         return;
     }
-    [self.memoryCache setObject:receiveData forKey:key];
+    /// 同时保存resumeData 和 进度数据
+    __weak typeof(self) weakSelf = self;
+    [self writeReceiveData:receiveData filePath:tempFilePath isSuccess:^(BOOL success) {
+        if (success) {
+            [weakSelf writeReceiveData:progressInfoData filePath:progressInfoPath isSuccess:^(BOOL success) {
+                if (success) {
+                    if (isSuccess) {
+                        isSuccess(YES);
+                    }
+                } else { /// 下一个没有保存成功，删除上一个已经保存的本地数据
+                    [weakSelf removeCacheDataWithPath:tempFilePath];
+                }
+            }];
+        }
+    }];
+}
+
+- (void)writeReceiveData:(NSData *)receiveData
+                filePath:(NSString *)filePath
+               isSuccess:(void(^)(BOOL success))isSuccess {
+    if (!receiveData || !filePath) {
+        if (isSuccess) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                isSuccess(NO);
+            });
+        }
+        return;
+    }
+    [self.memoryCache setObject:receiveData forKey:filePath];
     
     dispatch_async(self.operationQueue,^{
-        BOOL result = [self setContent:receiveData writeToFile:dictPath];
+        BOOL result = [self setContent:receiveData writeToFile:filePath];
         if (isSuccess) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 if (isSuccess) {
@@ -169,6 +199,7 @@ NSString *const WM_defaultCachePathName =@"AppCache";
         }
     });
 }
+
 - (BOOL)setContent:(NSObject *)content writeToFile:(NSString *)path{
     if (!content||!path){
         return NO;
@@ -184,28 +215,33 @@ NSString *const WM_defaultCachePathName =@"AppCache";
 
 /// 缓存数据
 /// @param path 文件路径
-/// @param key 一般是下载url地址
-- (NSData *)getCacheDataWithPath:(NSString *)path key:(NSString *)key{
-    if (!key) return nil;
+- (NSData *)getCacheDataWithPath:(NSString *)path {
     if (!path) return  nil;
-    NSData *obj = [self.memoryCache objectForKey:key];
+    NSData *obj = [self.memoryCache objectForKey:path];
     if (obj) {
         return obj;
     }else{
         NSData *diskdata= [NSData dataWithContentsOfURL:[NSURL fileURLWithPath:path]];
         if (diskdata) {
-            [self.memoryCache setObject:diskdata forKey:key];
+            [self.memoryCache setObject:diskdata forKey:path];
         }
        return diskdata;
     }
 }
-/// 删除断点下载数据
+/// 删除缓存数据
 /// @param path 地址
 /// @param key url
-- (void)removeCacheDataWithPath:(NSString *)path key:(NSString *)key {
-    if (!key || !path) return;
+- (void)removeCacheDataWithTempFilePath:(NSString *)tempFilePath progressInfoPath:(NSString *)progressInfoPath {
+    [self removeCacheDataWithPath:tempFilePath];
+    [self removeCacheDataWithPath:progressInfoPath];
+}
+
+/// 删除断点下载数据
+/// @param path 地址
+- (void)removeCacheDataWithPath:(NSString *)path {
+    if (!path) return;
     /// 先输出内存缓存
-    [self.memoryCache removeObjectForKey:key];
+    [self.memoryCache removeObjectForKey:path];
     /// 再删除磁盘缓存
     [self removeItemAtPath:path isSuccess:^(BOOL isSuccess) {
     }];

@@ -23,7 +23,20 @@
 - (void)startDownload:(WMDownloadAdapter *)download handle:(WMDownActionHandle)handle {
     _download = download;
     _handle = handle;
-    [self startDownload];
+    
+    
+    CGFloat currentLength = download.progress.completedUnitCount;
+    CGFloat fileLength = download.progress.totalUnitCount;
+    // 下载进度
+    if (fileLength == 0) {
+        self.progressView.progress = 0.0;
+        self.progressLabel.text = [NSString stringWithFormat:@"当前下载进度:00.00%%"];
+    } else {
+        self.progressView.progress =  1.0 * currentLength / fileLength;
+        self.progressLabel.text = [NSString stringWithFormat:@"当前下载进度:%.2f%%  %@",download.progress.fractionCompleted,download.progress.downloadNetworkSpeed];
+    }
+    
+//    [self startDownload];
 }
 
 + (CGFloat)cellHeight {

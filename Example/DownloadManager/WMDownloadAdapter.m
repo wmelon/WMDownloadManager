@@ -8,12 +8,19 @@
 
 #import "WMDownloadAdapter.h"
 
+/// 已经接收
+#define CountOfBytesReceived        @"countOfBytesReceived"
+/// 一共数据量
+#define CountOfBytesExpectedToReceive    @"countOfBytesExpectedToReceive"
+
 @interface WMDownloadAdapter()
+/// 断点下载进度本地存储路径
+@property (nonatomic, copy  ) NSString *resumeProgressInfoFile;
 @end
 
 @implementation WMDownloadAdapter
 
-@synthesize parameterDict = _parameterDict, downloadTempPath = _downloadTempPath ,filePath = _filePath ,direcPath = _direcPath;
+@synthesize parameterDict = _parameterDict, downloadTempPath = _downloadTempPath ,filePath = _filePath ,direcPath = _direcPath,progress = _progress;
 
 /// 初始化请求对象
 + (instancetype)downloadWithUrl:(NSString *)downloadUrl direcPath:(nonnull NSString *)direcPath{
@@ -29,8 +36,8 @@
         
         /// 临时存储数据地址
         NSString *downloadUrl = [self getReallyDownloadUrl:self.downloadUrl];
-        NSString *downloadTempPath = [[WMDownloadCacheManager sharedInstance] createTempFilePathWithDictPath:direcPath url:downloadUrl];
-        _downloadTempPath = downloadTempPath;
+        _downloadTempPath = [[WMDownloadCacheManager sharedInstance] createTempFilePathWithDictPath:direcPath url:downloadUrl pathExtension:@"tmp"];
+        _resumeProgressInfoFile = [[WMDownloadCacheManager sharedInstance] createTempFilePathWithDictPath:direcPath url:downloadUrl pathExtension:@"proTmp"];
         
         /// 监听进入后台
         __weak typeof(self) weakSelf = self;
@@ -45,20 +52,27 @@
     NSURLSessionTask *task = self.sessionTask;
     if ([task isKindOfClass:[NSURLSessionDownloadTask class]]){
         NSURLSessionDownloadTask *downloadTask = (NSURLSessionDownloadTask *)task;
-        [downloadTask cancelByProducingResumeData:^(NSData *resumeData) {  ///
-            /// 下载地址
-            NSString *downloadUrl = [self getReallyDownloadUrl:self.downloadUrl];
+        [downloadTask cancelByProducingResumeData:^(NSData *resumeData) {
             
-            [[WMDownloadCacheManager sharedInstance] writeReceiveData:resumeData dictPath:self.downloadTempPath key:downloadUrl isSuccess:^(BOOL isSuccess) {
-                if (isSuccess) {
-                    NSLog(@"--------------------\n暂停下载请求，保存当前已下载文件进度\n\n-URLAddress-:%@\n\n-downloadFileDirectory-:%@\n-----------------",downloadUrl,self.downloadTempPath );
-                } else {
-                    NSLog(@"保存数据失败  ----- %@",self.downloadTempPath );
-                }
-            }];
+            /// 本地缓存处理
+            if (resumeData.length > 0) {
+                /// 处理下载进度数据
+                NSMutableDictionary *resumeDataInfo = [NSMutableDictionary new];
+                resumeDataInfo[CountOfBytesReceived] = @(self.sessionTask.countOfBytesReceived);
+                resumeDataInfo[CountOfBytesExpectedToReceive] = @(self.sessionTask.countOfBytesExpectedToReceive);
+                NSData *resumeProgressInfoData = [NSJSONSerialization dataWithJSONObject:resumeDataInfo options:0 error:nil];
+                
+                /// 缓存数据和进度数据同时写入内存缓存和本地缓存
+                [[WMDownloadCacheManager sharedInstance] writeReceiveData:resumeData tempFilePath:self.downloadTempPath progressInfoData:resumeProgressInfoData progressInfoPath:self.resumeProgressInfoFile isSuccess:^(BOOL isSuccess) {
+                    if (isSuccess) {
+                        NSLog(@"--------------------\n暂停下载请求，保存当前已下载文件进度\n\n-downloadTempPath-:%@\n\n-downloadFileDirectory-:%@\n-----------------",self.downloadTempPath ,self.resumeProgressInfoFile);
+                    } else {
+                        NSLog(@"保存数据失败  ----- %@   %@",self.downloadTempPath,self.resumeProgressInfoFile );
+                    }
+                }];
+            }
         }];
     }
-    [self cancelDownload];
 }
 
 /// 请求参数  这个适用于确定字典不为空的情况
@@ -111,16 +125,40 @@
 - (NSData *)getResumeData {
     /// 下载本地存储路径
     NSString *tempFilePath = self.downloadTempPath;
-    
-    /// 下载地址
-    NSString *downloadUrl = [self getReallyDownloadUrl:self.downloadUrl];
 
     /// 缓存数据
-    NSData *ResumeData = [[WMDownloadCacheManager sharedInstance] getCacheDataWithPath:tempFilePath key:downloadUrl];
+    NSData *resumeData = [[WMDownloadCacheManager sharedInstance] getCacheDataWithPath:tempFilePath];
     
-    return ResumeData;
+    return resumeData;
 }
-
+- (WMProgress *)progress {
+    if (_progress) {
+        return _progress;
+    }
+    
+    NSData *jsonData = [[WMDownloadCacheManager sharedInstance] getCacheDataWithPath:self.resumeProgressInfoFile];
+    NSDictionary *proJson = [self progressInfoWithData:jsonData];
+    if ([proJson isKindOfClass:[NSDictionary class]]) {
+        /// 总数据
+        int64_t totalUnitCount = [proJson[CountOfBytesExpectedToReceive] integerValue];
+        /// 下载完成数据
+        int64_t completedUnitCount = [proJson[CountOfBytesReceived] integerValue];
+        /// 完成百分比
+        double fractionCompleted = 100.0 * completedUnitCount / totalUnitCount;
+        
+        /// 本地进度数据
+        WMProgress *progress = [WMProgress progressWithTotalUnitCount:totalUnitCount completedUnitCount:completedUnitCount fractionCompleted:fractionCompleted];
+        _progress = progress;
+    }
+    return _progress;
+}
+- (NSDictionary *)progressInfoWithData:(NSData *)jsonData {
+    if (jsonData.length > 0) {
+        NSDictionary *resumeDict = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingAllowFragments error:nil];
+        return resumeDict;
+    }
+    return nil;
+}
 /// 请求进度处理
 /// @param progress 进度数据
 - (void)responseAdapterWithProgress:(NSProgress *)progress {
@@ -162,7 +200,7 @@
 }
 - (void)downloadSuccess:(NSString *)filePath TempFilePath:(NSString *)TempFilePath response:(NSURLResponse *)response{
     /// 下载完成移除临时文件
-    [[WMDownloadCacheManager sharedInstance] removeCacheDataWithPath:TempFilePath key:[self getReallyDownloadUrl:self.downloadUrl]];
+    [[WMDownloadCacheManager sharedInstance] removeCacheDataWithTempFilePath:TempFilePath progressInfoPath:self.resumeProgressInfoFile];
     
     /// 解压
     if (filePath.exists) {
@@ -183,6 +221,8 @@
 }
 /// 取消单个下载请求
 - (void)cancelDownload {
+    /// 取消之前先存储下来数据
+    [self downloadStop];
     [self.sessionTask cancel];
 }
 

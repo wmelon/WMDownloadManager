@@ -29,7 +29,7 @@ NS_ASSUME_NONNULL_BEGIN
 /// 下载数据存储文件路径
 /// @param dictPath 外部传入文件路径 , 可能为空，为空直接使用默认地址
 /// @param url  下载数据的地址
-- (NSString *)createTempFilePathWithDictPath:(NSString *)dictPath url:(NSString *)url;
+- (NSString *)createTempFilePathWithDictPath:(NSString *)dictPath url:(NSString *)url pathExtension:(NSString *)pathExtension;
 
 
 /// 获取下载完成地址
@@ -43,19 +43,39 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// 向目录文件下写入data数据
 /// @param receiveData 下载的data数据
-/// @param dictPath 文件目录
-- (void)writeReceiveData:(NSData *)receiveData dictPath:(NSString *)dictPath key:(NSString *)key isSuccess:(void(^)(BOOL isSuccess))isSuccess;
+/// @param tempFilePath 临时文件
+- (void)writeReceiveData:(NSData *)receiveData
+            tempFilePath:(NSString *)tempFilePath
+        progressInfoData:(NSData *)progressInfoData
+        progressInfoPath:(NSString *)progressInfoPath
+               isSuccess:(void(^)(BOOL success))isSuccess;
+
+
+/// 删除缓存数据
+/// @param path 地址
+/// @param key url
+- (void)removeCacheDataWithTempFilePath:(NSString *)tempFilePath progressInfoPath:(NSString *)progressInfoPath;
+
+
+/// 缓存数据写入本地
+/// @param receiveData 数据
+/// @param filePath 本地文件
+/// @param isSuccess 结果回调
+- (void)writeReceiveData:(NSData *)receiveData
+                filePath:(NSString *)filePath
+               isSuccess:(void(^)(BOOL success))isSuccess;
 
 /// 获取缓存数据
 /// @param path 文件路径
 /// @param key 一般是下载url地址
-- (NSData *)getCacheDataWithPath:(NSString *)path key:(NSString *)key;
+- (NSData *)getCacheDataWithPath:(NSString *)path;
 
 
-/// 删除断点下载数据
+/// 删除缓存数据
 /// @param path 地址
 /// @param key url
-- (void)removeCacheDataWithPath:(NSString *)path key:(NSString *)key;
+- (void)removeCacheDataWithPath:(NSString *)path;
+
 
 @end
 
