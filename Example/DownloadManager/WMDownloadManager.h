@@ -24,11 +24,25 @@ typedef void(^WMBatchDownloadCompletionHandle)(NSArray<WMDownloadAdapter *> *res
 /// @param downloadAdapter 下载数据结构体
 + (void)downloadWithcomplete:(WMDownloadCompletionHandle)complete downloadAdapter:(WMDownloadAdapter *)downloadAdapter;
 
-#warning ---- 批量下载还有问题，后续看怎么优化
+
 /// 批量下载
 /// @param complete 所有完成请求回调  其中一个下载失败不会影响其它下载项
 /// @param downloadAdapter 下载请求结构体
-//+ (void)batchDownloadWithComplete:(WMBatchDownloadCompletionHandle)complete downloadAdapter:(WMDownloadAdapter *)downloadAdapter , ... NS_REQUIRES_NIL_TERMINATION;
++ (void)batchDownloadWithComplete:(WMBatchDownloadCompletionHandle)complete downloadAdapter:(WMDownloadAdapter *)downloadAdapter , ... NS_REQUIRES_NIL_TERMINATION;
+
+/**
+ *  获取网络状态 是否可用
+ */
++ (BOOL)isNetworkReachable;
+
+/**
+ *  是否为WiFi网络
+ */
++ (BOOL)isNetworkWiFi;
+
+/// 网络状态
++ (AFNetworkReachabilityStatus)networkReachability;
+
 
 /// 取消单个下载请求
 + (void)cancelDownload:(WMDownloadAdapter *)download;
@@ -37,18 +51,21 @@ typedef void(^WMBatchDownloadCompletionHandle)(NSArray<WMDownloadAdapter *> *res
 + (void)cancelAllDownload;
 
 /// 暂停单个下载请求
-/// @param download 下载对象
-+ (void)pauseDownload:(WMDownloadAdapter *)download;
+///// @param download 下载对象
+//+ (void)pauseDownload:(WMDownloadAdapter *)download;
+//
+///// 暂停所有下载请求
+//+ (void)pauseAllDownload;
+//
+///// 断点续传单个请求
+///// @param download 下载对象
+//+ (void)resumeDownload:(WMDownloadAdapter *)download;
+//
+///// 断点续传所有下载
+//+ (void)resumeAllDownload;
 
-/// 暂停所有下载请求
-+ (void)pauseAllDownload;
-
-/// 断点续传单个请求
-/// @param download 下载对象
-+ (void)resumeDownload:(WMDownloadAdapter *)download;
-
-/// 断点徐闯所有下载
-+ (void)resumeAllDownload;
+/// 不管哪一种方法停止下载都会调用这个方法，把已经下载的数据存储起来
++ (void)downloadStopWithRequest:(WMDownloadAdapter*)download;
 
 @end
 

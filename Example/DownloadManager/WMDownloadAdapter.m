@@ -10,20 +10,21 @@
 #import "WMDownloadCacheManager.h"
 
 @interface WMDownloadAdapter()
-
 @end
 
 @implementation WMDownloadAdapter
-@synthesize parameterDict = _parameterDict;
+
+@synthesize parameterDict = _parameterDict, downloadTempPath = _downloadTempPath ,filePath = _filePath ,direcPath = _direcPath;
 
 /// 初始化请求对象
-+ (instancetype)downloadWithUrl:(NSString *)downloadUrl {
-    return [[self alloc] initWithUrl:downloadUrl];
++ (instancetype)downloadWithUrl:(NSString *)downloadUrl direcPath:(nonnull NSString *)direcPath{
+    return [[self alloc] initWithUrl:downloadUrl direcPath:direcPath];
 }
 
-- (instancetype)initWithUrl:(NSString *)downloadUrl {
+- (instancetype)initWithUrl:(NSString *)downloadUrl direcPath:(NSString *)direcPath {
     if (self = [super init]) {
         _downloadUrl = downloadUrl;
+        _direcPath = direcPath;
     }
     return self;
 }
@@ -38,12 +39,21 @@
 - (void)downloadParameterSetValue:(id)value forKey:(NSString *)key {
     [self.parameterDict setValue:value forKey:key];
 }
-/// 设置文件下载存储文件夹路径
-- (void)configDirecPath:(NSString *)direcPath {
-    _direcPath = direcPath;
+
+- (NSString *)downloadTempPath {
+    return [WMDownloadCacheManager createTempFilePathWithDictPath:self.direcPath url:[self getReallyDownloadUrl:self.downloadUrl]];
+}
+
+- (NSString *)filePath{
+    return [WMDownloadCacheManager getFilePathWithTempFilePath:self.downloadTempPath url:[self getReallyDownloadUrl:self.downloadUrl]];
 }
 
 #pragma mark -- downloadmanager 需要使用的方法
+
+/// 配置session
+- (void)configSessionManager:(AFHTTPSessionManager *)sessionManager {
+    NSLog(@"%@  --- 子类可以重写   %@",self,sessionManager);
+}
 /// 设置请求队列
 /// @param sessionTask 当前请求队列
 - (void)requestSessionTask:(NSURLSessionTask *)sessionTask {
@@ -52,8 +62,7 @@
 
 /// 获取请求的网络地址
 /// @param url 请求地址
-/// @param sessionManager 请求管理器
-- (NSString *)getReallyDownloadUrl:(NSString *)url sessionManager:(AFHTTPSessionManager *)sessionManager {
+- (NSString *)getReallyDownloadUrl:(NSString *)url {
     return url;
 }
 
@@ -69,53 +78,30 @@
 
 /// 请求进度处理
 /// @param progress 进度数据
-- (void)responseAdapterWithProgress:(NSProgress *)progress currentLength:(NSInteger)currentLength{
+- (void)responseAdapterWithProgress:(NSProgress *)progress {
     /// 总数据
-    int64_t totalUnitCount = progress.totalUnitCount + currentLength;
+    int64_t totalUnitCount = progress.totalUnitCount;
     /// 下载完成数据
-    int64_t completedUnitCount = progress.completedUnitCount + currentLength;
+    int64_t completedUnitCount = progress.completedUnitCount;
     /// 完成百分比
     double fractionCompleted = 100.0 * completedUnitCount / totalUnitCount;
     WMProgress *wmPro = [WMProgress progressWithTotalUnitCount:totalUnitCount
                                             completedUnitCount:completedUnitCount
                                              fractionCompleted:fractionCompleted];
     _progress = wmPro;
-    _respStatus = WMDownloadResponseStatusProgress;
+    _downloadStatus = WMDownloadResponseStatusDownloading;
 }
 
 /// 下载完成处理
 /// @param response 返回数据
 /// @param filePath 存储下载数据文件路径
 /// @param error 下载失败
-- (void)responseAdapterWithResult:(NSURLResponse *)response TempFilePath:(NSString *)TempFilePath
-                         filePath:(NSString *)filePath
+- (void)responseAdapterWithResult:(NSURLResponse *)response
                             error:(NSError *)error {
-    if ([filePath isKindOfClass:[NSString class]]){
-        _filePath = filePath;
-    } else if ([filePath isKindOfClass:[NSURL class]]){
-        NSURL *url = (NSURL *)filePath;
-        _filePath = url.absoluteString;
-    }
-    
-    /// 下载完成拷贝
-    BOOL success = [WMDownloadCacheManager moveItemAtPath:TempFilePath toPath:filePath];
-    if (success == false) { /// 拷贝失败，先删掉文件再试一次
-        [WMDownloadCacheManager removeItemAtPath:filePath];
-        [WMDownloadCacheManager moveItemAtPath:TempFilePath toPath:filePath];
-    }
-    
-    /// 解压
-    if (filePath.exists) {
-        /// 解压缩包
-        [WMDownloadCacheManager unzipDownloadFile:filePath unzipHandle:^(NSString * _Nonnull unZipPath) {
-            _unZipFilePath = unZipPath;
-        }];
-    }
-
     if (error) { /// 下载失败处理
         [self downloadFail:_filePath error:error response:response];
     } else {  /// 下载成功处理
-        [self downloadSuccess:_filePath response:response];
+        [self downloadSuccess:_filePath TempFilePath:_downloadTempPath response:response];
     }
 }
 - (void)downloadFail:(NSString *)filePath error:(NSError *)error response:(NSURLResponse *)response{
@@ -124,40 +110,35 @@
     
     if (error.code == -999){ /// 取消下载
         _msg = @"取消下载";
-        _respStatus = WMDownloadResponseStatusCancel | WMDownloadResponseStatusComplete;
     } else {
         _msg = @"下载失败";
-        _respStatus = WMDownloadResponseStatusFailure | WMDownloadResponseStatusComplete;
     }
+    _downloadStatus = WMDownloadResponseStatusFailure;
 }
-- (void)downloadSuccess:(NSString *)filePath response:(NSURLResponse *)response{
+- (void)downloadSuccess:(NSString *)filePath TempFilePath:(NSString *)TempFilePath response:(NSURLResponse *)response{
+    /// 下载完成移除临时文件
+    [WMDownloadCacheManager removeItemAtPath:TempFilePath];
+    
+    /// 解压
+    if (filePath.exists) {
+        /// 解压缩包
+        [WMDownloadCacheManager unzipDownloadFile:filePath unzipHandle:^(NSString * _Nonnull unZipPath) {
+            _unZipFilePath = unZipPath;
+        }];
+    }
+    
     NSLog(@"😄😄😄 %@ 请求成功  (地址 ===> %@)",self ,response.URL.absoluteString);
     if (filePath){
         _msg = @"下载成功";
-        _respStatus = WMDownloadResponseStatusSuccess | WMDownloadResponseStatusComplete;
+        _downloadStatus = WMDownloadResponseStatusSuccess;
     } else {
         _msg = @"缓存失败";
-        _respStatus = WMDownloadResponseStatusNoSpace | WMDownloadResponseStatusComplete;
+        _downloadStatus = WMDownloadResponseStatusFailure;
     }
 }
 /// 取消单个下载请求
 - (void)cancelDownload {
-    _respStatus = WMDownloadResponseStatusCancel;
     [self.sessionTask cancel];
-}
-
-/// 暂停单个下载请求
-- (void)pauseDownload {
-    _respStatus = WMDownloadResponseStatusPause;
-    /// 暂停下载
-    [self.sessionTask suspend];
-}
-
-/// 断点续传单个请求
-- (void)resumeDownload {
-    _respStatus = WMDownloadResponseStatusProgress;
-    /// 继续下载
-    [self.sessionTask resume];
 }
 
 #pragma mark -- getter

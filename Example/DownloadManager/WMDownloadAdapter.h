@@ -13,20 +13,16 @@
 NS_ASSUME_NONNULL_BEGIN
 
 typedef NS_ENUM(NSInteger, WMDownloadResponseStatus) {
-    WMDownloadResponseStatusDefault = 1 << 0,        //初始状态
-    WMDownloadResponseStatusSuccess = 1 << 1,            //成功
-    WMDownloadResponseStatusProgress = 1 << 2,           //正在请求中
-    WMDownloadResponseStatusPause = 1 << 3,              //暂停下载
-    WMDownloadResponseStatusCancel = 1 << 4,             //已经取消
-    WMDownloadResponseStatusFailure = 1 << 5,            //失败
-    WMDownloadResponseStatusComplete = 1 << 6,           //请求完成
-    WMDownloadResponseStatusNoSpace = 1 << 7,            //手机空间不足
+    WMDownloadResponseStatusDefault = 0,         //初始状态
+    WMDownloadResponseStatusDownloading,         //下载中
+    WMDownloadResponseStatusFailure ,            //失败
+    WMDownloadResponseStatusSuccess ,            //成功
 };
 
 @interface WMDownloadAdapter : NSObject
 
-/// 请求返回状态
-@property (nonatomic, assign, readonly) WMDownloadResponseStatus respStatus;
+/// 下载状态
+@property (nonatomic, assign, readonly) WMDownloadResponseStatus downloadStatus;
 
 /// 请求完成之后的提示信息
 @property (nonatomic, copy  , readonly) NSString * msg;
@@ -39,6 +35,9 @@ typedef NS_ENUM(NSInteger, WMDownloadResponseStatus) {
 
 /// 本地缓存文件夹路径
 @property (nonatomic, copy  , readonly) NSString *direcPath;
+
+/// 临时存储数据路径
+@property (nonatomic, copy  , readonly) NSString *downloadTempPath;
 
 /// 本地存储数据文件路径
 @property (nonatomic, copy  , readonly) NSString *filePath;
@@ -58,7 +57,7 @@ typedef NS_ENUM(NSInteger, WMDownloadResponseStatus) {
 #pragma mark -- 构建请求体需要的方法
 
 /// 初始化请求对象
-+ (instancetype)downloadWithUrl:(NSString *)downloadUrl;
++ (instancetype)downloadWithUrl:(NSString *)downloadUrl direcPath:(NSString *)direcPath;
 
 /// 请求参数  这个适用于确定字典不为空的情况
 - (void)downloadParameters:(NSDictionary *)params;
@@ -66,28 +65,24 @@ typedef NS_ENUM(NSInteger, WMDownloadResponseStatus) {
 /// 请求参数
 - (void)downloadParameterSetValue:(id)value forKey:(NSString *)key;
 
-/// 设置文件下载存储文件夹路径
-- (void)configDirecPath:(NSString *)direcPath;
-
 #pragma mark -- downloadmanager 需要使用的方法
     
+/// 配置session
+- (void)configSessionManager:(AFHTTPSessionManager *)sessionManager;
+
 /// 获取请求的网络地址
 /// @param url 请求地址
 /// @param sessionManager 请求管理器
-- (NSString *)getReallyDownloadUrl:(NSString *)url sessionManager:(AFHTTPSessionManager *)sessionManager;
+- (NSString *)getReallyDownloadUrl:(NSString *)url;
 
 /// 请求进度处理
 /// @param progress 进度数据
-/// @param currentLength 当前数据
-- (void)responseAdapterWithProgress:(NSProgress *)progress currentLength:(NSInteger)currentLength;
+- (void)responseAdapterWithProgress:(NSProgress *)progress;
 
 /// 下载完成处理
 /// @param response 返回数据
-/// @param task 请求task
-/// @param filePath 存储下载数据文件路径
 /// @param error 下载失败
-- (void)responseAdapterWithResult:(NSURLResponse *)response TempFilePath:(NSString *)TempFilePath
-                         filePath:(NSString *)filePath
+- (void)responseAdapterWithResult:(NSURLResponse *)response
                             error:(NSError *)error;
 
 /**获取请求参数*/
@@ -102,12 +97,6 @@ typedef NS_ENUM(NSInteger, WMDownloadResponseStatus) {
 
 /// 取消单个下载请求
 - (void)cancelDownload;
-
-/// 暂停单个下载请求
-- (void)pauseDownload;
-
-/// 断点续传单个请求
-- (void)resumeDownload;
 
 @end
 

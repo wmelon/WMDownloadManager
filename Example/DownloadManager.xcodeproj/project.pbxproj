@@ -300,6 +300,9 @@
 				LastUpgradeCheck = 0720;
 				ORGANIZATIONNAME = wmelon;
 				TargetAttributes = {
+					6003F589195388D20070C39A = {
+						DevelopmentTeam = LZNBWDDMT8;
+					};
 					6003F5AD195388D20070C39A = {
 						TestTargetID = 6003F589195388D20070C39A;
 					};
@@ -560,6 +563,7 @@
 			baseConfigurationReference = 97C3762CA8A1F7D6048EE54E /* Pods-DownloadManager_Example.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = LZNBWDDMT8;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "DownloadManager/DownloadManager-Prefix.pch";
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -568,7 +572,7 @@
 				);
 				INFOPLIST_FILE = "DownloadManager/DownloadManager-Info.plist";
 				MODULE_NAME = ExampleApp;
-				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.demo.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.DownloadManager-Example.test";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 				WRAPPER_EXTENSION = app;
@@ -580,6 +584,7 @@
 			baseConfigurationReference = 4640E3343A8F330D987B62FA /* Pods-DownloadManager_Example.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = LZNBWDDMT8;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "DownloadManager/DownloadManager-Prefix.pch";
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -588,7 +593,7 @@
 				);
 				INFOPLIST_FILE = "DownloadManager/DownloadManager-Info.plist";
 				MODULE_NAME = ExampleApp;
-				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.demo.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.DownloadManager-Example.test";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 				WRAPPER_EXTENSION = app;

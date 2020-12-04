@@ -38,9 +38,9 @@ static NSString *const kAiPlayer     = @"aiPlayer";
 + (NSString *)previewPathWith:(NSString *)lessonId resourceId:(NSString *)resourceId version:(NSString *)version   {
      
     NSString *dirPreview = [WMDownload_resource_history_cache_PATH stringByAppendingPathComponent:kPreview];
-    NSString *dirLesson = [dirPreview stringByAppendingPathComponent:[NSString stringWithFormat:@"%@", lessonId]];
-    NSString *dirID = [dirLesson stringByAppendingPathComponent:[NSString stringWithFormat:@"%@", resourceId]];
-    NSString *dirVersion = [dirID stringByAppendingPathComponent:[NSString stringWithFormat:@"%@", version]];
+    NSString *dirLesson = [dirPreview stringByAppendingPathComponent:[NSString stringWithFormat:@"%@", [self MD5:lessonId]]];
+    NSString *dirID = [dirLesson stringByAppendingPathComponent:[NSString stringWithFormat:@"%@", [self MD5:resourceId]]];
+    NSString *dirVersion = [dirID stringByAppendingPathComponent:[NSString stringWithFormat:@"%@", [self MD5:version]]];
      
     return dirVersion;
 }

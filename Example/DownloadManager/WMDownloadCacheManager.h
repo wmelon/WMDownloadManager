@@ -15,14 +15,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface WMDownloadCacheManager : NSObject
 
-/// 向目录文件下写入data数据
-/// @param receiveData 下载的data数据
-/// @param dictPath 文件目录
-+ (void)writeReceiveData:(NSData *)receiveData dictPath:(NSString *)dictPath;
++ (WMDownloadCacheManager *)sharedInstance;
 
-/// 当前下载长度
-/// @param filePath文件路径
-+ (NSInteger)currentLengthWithFilePath:(NSString *)filePath;
+/// MD5加密字符串
++ (NSString *)MD5:(NSString *)string;
 
 /// 删除文件数据
 /// @param filePath 文件路径
@@ -36,19 +32,25 @@ NS_ASSUME_NONNULL_BEGIN
 /// @param url  下载数据的地址
 + (NSString *)createTempFilePathWithDictPath:(NSString *)dictPath url:(NSString *)url;
 
+
 /// 获取下载完成地址
 /// @param tempFilePath 临时数据地址
 + (NSString *)getFilePathWithTempFilePath:(NSString *)tempFilePath url:(NSString *)url;
 
-
-/// 将文件拷贝路径
-/// @param path from
-/// @param toPath to
-+ (BOOL)moveItemAtPath:(NSString *)path toPath:(NSString *)toPath;
-
 /// 解压zip文件
 /// @param filePath 文件本地存储路径
 + (void)unzipDownloadFile:(NSString *)filePath unzipHandle:(void(^)(NSString *unZipPath))handle;
+
+
+/// 向目录文件下写入data数据
+/// @param receiveData 下载的data数据
+/// @param dictPath 文件目录
+- (void)writeReceiveData:(NSData *)receiveData dictPath:(NSString *)dictPath key:(NSString *)key isSuccess:(void(^)(BOOL isSuccess))isSuccess;
+
+/// 获取缓存数据
+/// @param path 文件路径
+/// @param key 一般是下载url地址
+- (NSData *)getCacheDataWithPath:(NSString *)path key:(NSString *)key;
 
 @end
 

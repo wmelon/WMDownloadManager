@@ -11,7 +11,37 @@
 
 @import SSZipArchive;
 
+NSString *const zb_defaultCachePathName =@"AppCache";
+
+@interface WMDownloadCacheManager()
+/// 内存缓存
+@property (nonatomic, strong) NSCache *memoryCache;
+/// 文件操作队列
+@property (nonatomic ,strong) dispatch_queue_t operationQueue;
+@end
+
 @implementation WMDownloadCacheManager
+
++ (WMDownloadCacheManager *)sharedInstance {
+    static WMDownloadCacheManager *once;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        once = [[WMDownloadCacheManager alloc] init];
+    });
+    return once;
+}
+
+- (instancetype)init {
+    if (self = [super init]) {
+        NSString *memoryNameSpace = [@"memory.ZBCacheManager" stringByAppendingString:zb_defaultCachePathName];
+        
+        _memoryCache = [[NSCache alloc] init];
+        _memoryCache.name = memoryNameSpace;
+        
+        _operationQueue = dispatch_queue_create("dispatch.ZBCacheManager", DISPATCH_QUEUE_SERIAL);
+    }
+    return self;
+}
 
 #pragma mark -- private method
 /// 检查字符串是否为空
@@ -36,39 +66,11 @@
 }
 #pragma mark -- public method
 
-/// 当前下载长度
-/// @param filePath文件路径
-+ (NSInteger)currentLengthWithFilePath:(NSString *)filePath {
-    NSInteger fileLength = 0;
-    NSFileManager *fileManager = [[NSFileManager alloc] init]; // default is not thread safe
-    if ([filePath exists]) {
-        NSError *error = nil;
-        NSDictionary *fileDict = [fileManager attributesOfItemAtPath:filePath error:&error];
-        if (!error && fileDict) {
-            fileLength = [fileDict fileSize];
-        }
-    }
-    return fileLength;
-}
-
 /// 临时文件路径
 /// @param url 下载地址
 + (NSString *)tempFilenameWithDownloadUrl:(NSString *)url {
-    NSString *tempFilename = [NSString stringWithFormat:@"%@.temp", [self MD5:url]];
+    NSString *tempFilename = [NSString stringWithFormat:@"%@.tmp", [self MD5:url]];
     return tempFilename;
-}
-
-/// 向目录文件下写入data数据
-/// @param receiveData 下载的data数据
-/// @param dictPath 文件目录
-+ (void)writeReceiveData:(NSData *)receiveData dictPath:(NSString *)dictPath {
-    NSFileHandle *fileHandle = [NSFileHandle fileHandleForWritingAtPath:dictPath];
-    
-    // 指定数据的写入位置 -- 文件内容的最后面
-    [fileHandle seekToEndOfFile];
-    
-    // 向沙盒写入数据
-    [fileHandle writeData:receiveData];
 }
 
 /// 删除本地存在的文件
@@ -101,18 +103,12 @@
     }
     return filePath;
 }
+
 /// 获取下载完成地址
 /// @param tempFilePath 临时数据地址
 + (NSString *)getFilePathWithTempFilePath:(NSString *)tempFilePath url:(NSString *)url {
     NSString *filePath = [NSString stringWithFormat:@"%@.%@",tempFilePath.namePath,url.pathExtension];
     return filePath;
-}
-
-/// 将文件拷贝路径
-/// @param path from
-/// @param toPath to
-+ (BOOL)moveItemAtPath:(NSString *)path toPath:(NSString *)toPath {
-    return [[NSFileManager defaultManager] moveItemAtPath:path toPath:toPath error:nil];
 }
 
 /// 解压zip文件
@@ -140,4 +136,61 @@
         NSLog(@"需要解压的文件不存在  ---- filePath === %@",filePath);
     }
 }
+
+/// 向目录文件下写入data数据
+/// @param receiveData 下载的data数据
+/// @param dictPath 文件目录
+- (void)writeReceiveData:(NSData *)receiveData
+                dictPath:(NSString *)dictPath
+                     key:(NSString *)key
+               isSuccess:(void(^)(BOOL isSuccess))isSuccess{
+    if (!receiveData || !key) {
+        if (isSuccess) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                isSuccess(NO);
+            });
+        }
+        return;
+    }
+    [self.memoryCache setObject:receiveData forKey:key];
+    
+    dispatch_async(self.operationQueue,^{
+        BOOL result = [self setContent:receiveData writeToFile:dictPath];
+        if (isSuccess) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                isSuccess(result);
+            });
+        }
+    });
+}
+- (BOOL)setContent:(NSObject *)content writeToFile:(NSString *)path{
+    if (!content||!path){
+        return NO;
+    }
+    if ([content isKindOfClass:[NSData class]]) {
+        return  [(NSData *)content writeToFile:path atomically:YES];
+    }else {
+        NSLog(@"文件类型:%@,沙盒存储失败。",NSStringFromClass([content class]));
+        return NO;
+    }
+    return NO;
+}
+
+/// 缓存数据
+/// @param path 文件路径
+/// @param key 一般是下载url地址
+- (NSData *)getCacheDataWithPath:(NSString *)path key:(NSString *)key{
+    if (!key) return nil;
+    NSData *obj = [self.memoryCache objectForKey:key];
+    if (obj) {
+        return obj;
+    }else{
+        NSData *diskdata= [NSData dataWithContentsOfURL:[NSURL fileURLWithPath:path]];
+        if (diskdata) {
+            [self.memoryCache setObject:diskdata forKey:key];
+        }
+       return diskdata;
+    }
+}
+
 @end
