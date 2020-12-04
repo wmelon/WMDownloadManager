@@ -33,8 +33,11 @@
         self.progressLabel.text = [NSString stringWithFormat:@"当前下载进度:00.00%%"];
     } else {
         self.progressView.progress =  1.0 * currentLength / fileLength;
-        self.progressLabel.text = [NSString stringWithFormat:@"当前下载进度:%.2f%%  %@",download.progress.fractionCompleted,download.progress.downloadNetworkSpeed];
+        self.progressLabel.text = [NSString stringWithFormat:@"当前下载进度:%.2f%%",download.progress.fractionCompleted];
     }
+    
+    /// 下载速度
+    self.speedLabel.text = @"0kb/s";
     
 //    [self startDownload];
 }
@@ -56,8 +59,11 @@
                 weakSelf.progressLabel.text = [NSString stringWithFormat:@"当前下载进度:00.00%%"];
             } else {
                 weakSelf.progressView.progress =  1.0 * currentLength / fileLength;
-                weakSelf.progressLabel.text = [NSString stringWithFormat:@"当前下载进度:%.2f%%  %@",response.progress.fractionCompleted,response.progress.downloadNetworkSpeed];
+                weakSelf.progressLabel.text = [NSString stringWithFormat:@"当前下载进度:%.2f%%",response.progress.fractionCompleted];
             }
+            
+            /// 下载速度
+//            weakSelf.speedLabel.text = response.progress.downloadNetworkSpeed;
             
         } else if (response.downloadStatus == WMDownloadResponseStatusSuccess) {
             NSLog(@"direcPath ===   %@",response.direcPath);

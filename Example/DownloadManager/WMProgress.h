@@ -18,10 +18,6 @@ NS_ASSUME_NONNULL_BEGIN
 /// 完成百分比
 @property (nonatomic, assign, readonly) double fractionCompleted;
 
-/// 下载速度     下载速度 10k/s  1M/s 
-@property (nonatomic, copy  , readonly) NSString *downloadNetworkSpeed;
-
-
 /// 构造函数
 /// @param totalUnitCount 总数据量
 /// @param completedUnitCount 已下载数据量

@@ -155,7 +155,7 @@ typedef NS_ENUM(NSInteger,WMButtonStatus) {
                 weakSelf.progressLabel.text = [NSString stringWithFormat:@"当前下载进度:00.00%%"];
             } else {
                 weakSelf.progressView.progress =  1.0 * currentLength / fileLength;
-                weakSelf.progressLabel.text = [NSString stringWithFormat:@"当前下载进度:%.2f%%  %@",response.progress.fractionCompleted,response.progress.downloadNetworkSpeed];
+                weakSelf.progressLabel.text = [NSString stringWithFormat:@"当前下载进度:%.2f%%",response.progress.fractionCompleted];
             }
             NSLog(@"%@",weakSelf.progressLabel.text);
         } else if (response.downloadStatus == WMDownloadResponseStatusSuccess) {
